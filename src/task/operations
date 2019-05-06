@@ -1,0 +1,19 @@
+	///**
+	// * 重新拼装MetaBlocks
+	// */
+	//MetaBlocks := []*flac.MetaBlock{Block_STREAMINFO}
+	//if Block_VORBIS_COMMENT != nil {
+	//	MetaBlocks = append(MetaBlocks, Block_VORBIS_COMMENT)
+	//}
+	//
+	//if len(Block_PICTURE) > 0 {
+	//	MetaBlocks = append(MetaBlocks, Block_PICTURE...)
+	//}
+	//fInput.MetaBlocks = MetaBlocks
+	//
+	///**
+	// * 写入文件
+	// */
+	//if err := fInput.WriteToFile(*outputFilePath); err != nil {
+	//	err.Throw(util.RsError)
+	//}
