@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"os"
 	"p20190417/types"
-	"p20190417/util"
 	"strconv"
+	"sync"
 )
 
 type Flac struct {
@@ -18,7 +18,7 @@ var flacSignature = []byte("fLaC")
 
 var id3Signature = []byte("ID3")
 
-func (fObj *Flac) Parse(br *util.BinaryReader) *types.Exception {
+func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 	var err *types.Exception
 	var marker = make([]byte, 4)
 	if marker, err = br.ReadBytes(4); err != nil {
@@ -67,9 +67,9 @@ func (fObj *Flac) Parse(br *util.BinaryReader) *types.Exception {
 		types.NewException(TMFlac_CanNotRead_Frames, nil, nil)
 	} else {
 		fObj.Frames = FrameBytes
-		util.Throw(types.NewException(TMFlac_Read_Frames, map[string]string{
+		types.Throw(types.NewException(TMFlac_Read_Frames, map[string]string{
 			"length": strconv.Itoa(len(FrameBytes)),
-		}, nil), util.RsNotify)
+		}, nil), types.RsInfo)
 	}
 
 	return nil
@@ -85,7 +85,7 @@ func (fObj *Flac) ParseFromFile(path string) *types.Exception {
 		_ = file.Close()
 	}()
 
-	return fObj.Parse(util.NewBinaryReader(file))
+	return fObj.Parse(types.NewBinaryReader(file))
 }
 
 func (fObj *Flac) Encode() (*types.Buffer, *types.Exception) {
@@ -142,4 +142,18 @@ func (fObj *Flac) WriteToFile(path string) *types.Exception {
 
 func (fObj *Flac) Initialized() bool {
 	return fObj.MetaBlocks != nil && fObj.Frames != nil
+}
+
+var globalFlac *Flac
+var globalFlacLock sync.Mutex
+
+func GlobalFlac() *Flac {
+	if globalFlac == nil {
+		globalFlacLock.Lock()
+		defer globalFlacLock.Unlock()
+		if globalFlac == nil {
+			globalFlac = &Flac{}
+		}
+	}
+	return globalFlac
 }

@@ -1,11 +1,11 @@
 TASKS:
-#  - OWNER: FLAC_VORBIS_COMMENT
-#    LIST:
-#      - OPER: setRefer
-#        ARGS: "Digimon Audiopedia Database Project®"
-#      - OPER: printRefer
-
-#  - OWNER: FLAC_VORBIS_COMMENT
+  - OWNER: VORBIS_COMMENT
+    LIST:
+      - OPER: setRefer
+        ARGS: "Digimon Audiopedia Database Project®"
+      - OPER: printRefer
+#
+#  - OWNER: VORBIS_COMMENT
 #    LIST:
 #      - OPER: dumpTags
 #        ARGS: "tags.txt"
@@ -18,10 +18,30 @@ TASKS:
 #      - OPER: deleteTags
 #        ARGS: [ALBUM,ARTIST,CAT#]
 #      - OPER: printTags
-
-#  - OWNER: FLAC_VORBIS_COMMENT
+#
+#  - OWNER: VORBIS_COMMENT
 #    LIST:
 #      - OPER: sortTags
 #        ARGS: [ARTIST, TITLE, ALBUM, DATE, GENRE, TRACKNUMBER, TRACKTOTAL,
 #               DISCNUMBER, DISCTOTAL, EAN-13, CAT#, ...]
 #      - OPER: printTags
+
+
+#  - OWNER: PICTURE
+#    LIST:
+#      - OPER: dumpPic
+#        ARGS:
+#          - "3->pic_type3.png"
+#          - "6->pic_type6.png"
+#
+#  - OWNER: BLOCKS
+#    LIST:
+#      - OPER: deleteBlocks
+#        ARGS:
+#          - PICTURE:6...
+#      - OPER: sortBlocks
+#        ARGS:
+#          - STREAMINFO
+#          - VORBIS_COMMENT
+#          - PICTURE:6...
+#          - PICTURE:3...

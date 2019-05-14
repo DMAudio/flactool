@@ -3,7 +3,6 @@ package flac
 import (
 	"encoding/binary"
 	"p20190417/types"
-	"p20190417/util"
 )
 
 type MetaBlockT6PICT struct {
@@ -17,7 +16,7 @@ type MetaBlockT6PICT struct {
 	picData   []byte
 }
 
-func (mb *MetaBlockT6PICT) Parse(r *util.BinaryReader) *types.Exception {
+func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
 	//图片类型
 	if TypeData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6Type, nil, err)
@@ -162,3 +161,8 @@ func (mb *MetaBlockT6PICT) GetPicType() int {
 	return int(mb.picType)
 }
 
+func (mb *MetaBlockT6PICT) GetTags() *MetaBlockTags {
+	m := NewMetaBlockTags()
+
+	return m
+}

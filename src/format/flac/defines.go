@@ -74,6 +74,11 @@ var TMFlac_Parsed_MetaBlock = types.NewMask(
 	"成功解析了一个元数据块（类型：{{type}}，长度：4+{{length}} Bytes）",
 )
 
+var TMFlac_CanNotParse_MetaBlockHead = types.NewMask(
+	"CAN_NOT_PARSE_METABLOCK_HEAD",
+	"无法解析Meta数据块的头部",
+)
+
 var TMFlac_CanNotParse_MetaBlockSIZE = types.NewMask(
 	"CAN_NOT_PARSE_METABLOCK_SIZE",
 	"无法解析Meta数据块的大小",
@@ -177,6 +182,11 @@ var TMFlac_CanNotWrite_MetaT4CommentItemLength = types.NewMask(
 var TMFlac_CanNotParse_MetaT4CommentData = types.NewMask(
 	"CAN_NOT_PARSE_META_T4_Comment_Data",
 	"无法解析VORBIS_COMMENT的Comment条目内容",
+)
+
+var TMFlac_CanNotDump_MetaT4CommentList = types.NewMask(
+	"CAN_NOT_DUMP_META_T4_Comment_List",
+	"无法导出VORBIS_COMMENT的Comment列表",
 )
 
 var TMFlac_CanNotRead_MetaT6Type = types.NewMask(

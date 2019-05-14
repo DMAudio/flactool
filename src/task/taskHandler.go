@@ -3,7 +3,6 @@ package task
 import (
 	"fmt"
 	"p20190417/types"
-	"p20190417/util"
 	"sync"
 )
 
@@ -36,9 +35,9 @@ func (h *Handler) Execute(handler string, operation string, args interface{}) *t
 	} else if output, err := handlerFunc(operation, args); err != nil {
 		return err
 	} else if output != nil {
-		util.Throw(types.NewException(TMTask_Output, map[string]string{
+		types.Throw(types.NewException(TMTask_Output, map[string]string{
 			"value": fmt.Sprintf("%v", output),
-		}, nil), util.RsInfo)
+		}, nil), types.RsInfo)
 	}
 
 	return nil

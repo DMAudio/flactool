@@ -2,24 +2,9 @@ package flac
 
 import (
 	"p20190417/types"
-	"sync"
 )
 
-var globalFlac *Flac
-var globalFlacLock sync.Mutex
-
-func GlobalFlac() *Flac {
-	if globalFlac == nil {
-		globalFlacLock.Lock()
-		defer globalFlacLock.Unlock()
-		if globalFlac == nil {
-			globalFlac = &Flac{}
-		}
-	}
-	return globalFlac
-}
-
-const TaskHandler_T4VORB_Key = "FLAC_VORBIS_COMMENT"
+const TaskHandler_T4VORB_Key = MetaBlockTypeStr_VORBIS_COMMENT
 
 func TaskHandler_T4VORB(operation string, args interface{}) (interface{}, *types.Exception) {
 	switch operation {
@@ -39,17 +24,34 @@ func TaskHandler_T4VORB(operation string, args interface{}) (interface{}, *types
 		return TaskHandler_T4VORB_DeleteTags(args)
 	case "sortTags":
 		return TaskHandler_T4VORB_SortTags(args)
+	default:
+		return nil, nil
 	}
-
-	return nil, nil
 }
 
-func TMFlac_Task_Arguments_Format_Exception(expected string, got string) *types.Exception {
-	return types.NewException(types.NewMask(
-		"ARGUMENTS_FORMAT_ERROR",
-		"参数格式错误：预期：{{expected}}，实际：{{got}}",
-	), map[string]string{
-		"expected": expected,
-		"got":      got,
-	}, nil)
+const TaskHandler_T6PICT_Key = MetaBlockTypeStr_PICTURE
+
+func TaskHandler_T6PICT(operation string, args interface{}) (interface{}, *types.Exception) {
+	switch operation {
+	case "dumpPic":
+		return TaskHandler_T6PICT_dumpPic(args)
+	case "setPic":
+		return TaskHandler_T6PICT_setPic(args)
+	default:
+		return nil, nil
+	}
 }
+
+const TaskHandler_BLOCKS_Key = "BLOCKS"
+
+func TaskHandler_BLOCKS(operation string, args interface{}) (interface{}, *types.Exception) {
+	switch operation {
+	case "sortBlocks":
+		return TaskHandler_MAIN_SortBlocks(args)
+	//case "deleteBlocks":
+	//	return TaskHandler_MAIN_DeleteBlocks(args)
+	default:
+		return nil, nil
+	}
+}
+

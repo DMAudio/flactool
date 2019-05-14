@@ -17,5 +17,13 @@ func Init() *types.Exception {
 		return registerFailedErr.SetCause(err).SetParam("handler", TaskHandler_T4VORB_Key)
 	}
 
+	if err := task.GlobalHandler().Register(TaskHandler_T6PICT_Key, TaskHandler_T6PICT); err != nil {
+		return registerFailedErr.SetCause(err).SetParam("handler", TaskHandler_T6PICT_Key)
+	}
+
+	if err := task.GlobalHandler().Register(TaskHandler_BLOCKS_Key, TaskHandler_BLOCKS); err != nil {
+		return registerFailedErr.SetCause(err).SetParam("handler", TaskHandler_BLOCKS_Key)
+	}
+
 	return nil
 }

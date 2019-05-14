@@ -1,4 +1,4 @@
-package util
+package types
 
 func BytesToUInt64(bytes []byte) uint64 {
 	var result uint64

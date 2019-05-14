@@ -51,7 +51,7 @@ func TaskHandler_T4VORB_SetRefer(args interface{}) (interface{}, *types.Exceptio
 	if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
 	} else if newRefer, ok := args.(string); !ok {
-		return nil, TMFlac_Task_Arguments_Format_Exception("string",
+		return nil, types.Mismatched_Format_Exception("string",
 			reflect.TypeOf(args).String(),
 		)
 	} else {
@@ -65,8 +65,12 @@ func TaskHandler_T4VORB_PrintTags(args interface{}) (interface{}, *types.Excepti
 		return nil, err
 	} else {
 		message := types.NewBuffer()
-		for _, comment := range body.GetCommentList() {
-			_, _ = message.WriteString(fmt.Sprintf("%s=%s\n", comment[0], comment[1]))
+		if commentList, err := body.Comments().DumpList(); err != nil {
+			return nil, types.NewException(TMFlac_CanNotDump_MetaT4CommentList, nil, err)
+		} else {
+			for _, commentRecord := range commentList {
+				_, _ = message.WriteString(fmt.Sprintf("%s=%s\n", commentRecord[0], commentRecord[1]))
+			}
 		}
 
 		return strings.TrimSpace(message.String()), nil
@@ -74,18 +78,11 @@ func TaskHandler_T4VORB_PrintTags(args interface{}) (interface{}, *types.Excepti
 }
 
 func TaskHandler_T4VORB_SetTags(args interface{}) (interface{}, *types.Exception) {
-	if argList, ok := args.([]interface{}); !ok {
-		return nil, TMFlac_Task_Arguments_Format_Exception("Kind:slice",
-			"Kind:"+reflect.TypeOf(args).Kind().String(),
-		)
+	if argList, err := types.InterfaceToStringSlice(args); err != nil {
+		return nil, err
 	} else {
-
-		for _, argRaw := range argList {
-			if argParsed, ok := argRaw.(string); !ok {
-				return nil, TMFlac_Task_Arguments_Format_Exception("string",
-					reflect.TypeOf(argRaw).String(),
-				)
-			} else if err := TaskHandler_T4VORB_SetTagLine(argParsed); err != nil {
+		for _, argParsed := range argList {
+			if err := TaskHandler_T4VORB_SetTagLine(argParsed); err != nil {
 				return nil, TaskHandler_T4VORB_SetTagLine(argParsed)
 			}
 		}
@@ -97,18 +94,18 @@ func TaskHandler_T4VORB_SetTagLine(line string) *types.Exception {
 	if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return err
 	} else if lineSplit := strings.SplitN(line, "=", 2); len(lineSplit) != 2 {
-		return TMFlac_Task_Arguments_Format_Exception("(key)=(value)",
+		return types.Mismatched_Format_Exception("(key)=(value)",
 			line,
 		)
 	} else {
-		body.SetComment(lineSplit[0], lineSplit[1])
+		body.Comments().Set(lineSplit[0], lineSplit[1], types.SSLM_Append)
 	}
 	return nil
 }
 
 func TaskHandler_T4VORB_dumpTags(args interface{}) (interface{}, *types.Exception) {
 	if tagListPath, ok := args.(string); !ok {
-		return nil, TMFlac_Task_Arguments_Format_Exception("string",
+		return nil, types.Mismatched_Format_Exception("string",
 			reflect.TypeOf(args).String(),
 		)
 	} else if tagListAbsPath, err := filepath.Abs(strings.TrimSpace(tagListPath)); err != nil {
@@ -131,7 +128,7 @@ func TaskHandler_T4VORB_dumpTags(args interface{}) (interface{}, *types.Exceptio
 
 func TaskHandler_T4VORB_importTags(args interface{}) (interface{}, *types.Exception) {
 	if tagListPath, ok := args.(string); !ok {
-		return nil, TMFlac_Task_Arguments_Format_Exception("string",
+		return nil, types.Mismatched_Format_Exception("string",
 			reflect.TypeOf(args).String(),
 		)
 	} else if tagListAbsPath, err := filepath.Abs(strings.TrimSpace(tagListPath)); err != nil {
@@ -159,17 +156,17 @@ func TaskHandler_T4VORB_DeleteTags(args interface{}) (interface{}, *types.Except
 	if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
 	} else if argList, ok := args.([]interface{}); !ok {
-		return nil, TMFlac_Task_Arguments_Format_Exception("Kind:Slice",
+		return nil, types.Mismatched_Format_Exception("Kind:Slice",
 			"Kind:"+reflect.TypeOf(args).Kind().String(),
 		)
 	} else {
 		for _, argRaw := range argList {
 			if argParsed, ok := argRaw.(string); !ok {
-				return nil, TMFlac_Task_Arguments_Format_Exception("string",
+				return nil, types.Mismatched_Format_Exception("string",
 					reflect.TypeOf(argRaw).String(),
 				)
 			} else {
-				body.DeleteComment(argParsed)
+				body.Comments().Delete(argParsed)
 			}
 		}
 	}
@@ -179,49 +176,10 @@ func TaskHandler_T4VORB_DeleteTags(args interface{}) (interface{}, *types.Except
 func TaskHandler_T4VORB_SortTags(args interface{}) (interface{}, *types.Exception) {
 	if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
-	} else if argList, ok := args.([]interface{}); !ok {
-		return nil, TMFlac_Task_Arguments_Format_Exception("Kind:Slice",
-			"Kind:"+reflect.TypeOf(args).Kind().String(),
-		)
+	} else if sortBy, err := types.InterfaceToStringSlice(args); err != nil {
+		return nil, err
 	} else {
-		sortBy := make([]string, len(argList))
-		for argIndex, argRaw := range argList {
-			if argParsed, ok := argRaw.(string); !ok {
-				return nil, TMFlac_Task_Arguments_Format_Exception("string",
-					reflect.TypeOf(argRaw).String(),
-				)
-			} else {
-				sortBy[argIndex] = argParsed
-			}
-		}
-		oldTags := body.GetCommentMap()
-		newTags := make([][2]string, 0)
-
-		fillOtherTags := -1
-
-		for _, tagKey := range sortBy {
-			if tagKey == "..." {
-				newTags = append(newTags, [2]string{tagKey, ""})
-				fillOtherTags = len(newTags) - 1
-			}
-			if tagContent, ok := oldTags[tagKey]; ok {
-				newTags = append(newTags, [2]string{tagKey, tagContent})
-				delete(oldTags, tagKey)
-			}
-		}
-
-		if fillOtherTags > -1 {
-			otherTags := make([][2]string, 0)
-			for tagKey, tagContent := range oldTags {
-				otherTags = append(otherTags, [2]string{tagKey, tagContent})
-			}
-			restTags := newTags[fillOtherTags+1:]
-			newTags = append(newTags[:fillOtherTags], otherTags...)
-			newTags = append(newTags, restTags...)
-
-		}
-
-		body.SetComments(newTags)
+		body.Comments().Sort(sortBy)
 	}
 
 	return nil, nil

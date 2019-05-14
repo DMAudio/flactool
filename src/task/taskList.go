@@ -86,7 +86,7 @@ func LoadTaskList() ([]*Collection, *types.Exception) {
 
 	} else if TaskCollectionsRaw, ok := fileParsed["tasks"]; !ok || TaskCollectionsRaw == nil {
 		return nil, types.NewException(TMConfig_UnableToParse_TaskFile, map[string]string{
-			"reason": "找不到主键:TASKS",
+			"reason": "找不到主键 TASKS 或 主键 TASKS 为空",
 		}, nil)
 
 	} else if TaskCollections, ok := TaskCollectionsRaw.([]interface{}); !ok || TaskCollections == nil {

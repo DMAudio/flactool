@@ -5,7 +5,7 @@ import (
 	"p20190417/config"
 	"p20190417/format/flac"
 	"p20190417/task"
-	"p20190417/util"
+	"p20190417/types"
 )
 
 var inputFile *string
@@ -17,7 +17,7 @@ func InitMain() {
 }
 
 func main() {
-	util.InitThrowableExt()
+	types.InitThrowableExt()
 	task.Init()
 	flac.Init()
 	InitMain()
@@ -32,7 +32,7 @@ func main() {
 
 	if *task.CollectionFile != "" {
 		if err := task.ExecuteTasks(); err != nil {
-			util.Throw(err, util.RsError)
+			types.Throw(err, types.RsError)
 		}
 	} else {
 		panic("未指定任务配置文件")

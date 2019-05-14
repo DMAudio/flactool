@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"p20190417/types"
-	"p20190417/util"
-	"strconv"
 )
 
 type MetaBlockType uint8
@@ -20,25 +18,37 @@ const (
 	MetaBlockType_PICTURE        = 6
 )
 
+const (
+	MetaBlockTypeStr_STREAMINFO     = "STREAMINFO"
+	MetaBlockTypeStr_PADDING        = "PADDING"
+	MetaBlockTypeStr_APPLICATION    = "APPLICATION"
+	MetaBlockTypeStr_SEEKTABLE      = "SEEKTABLE"
+	MetaBlockTypeStr_VORBIS_COMMENT = "VORBIS_COMMENT"
+	MetaBlockTypeStr_CUESHEET       = "CUESHEET"
+	MetaBlockTypeStr_PICTURE        = "PICTURE"
+)
+
 type MetaBlock struct {
 	Type MetaBlockType
 	Body MetaBlockBody
 }
 
 type MetaBlockBody interface {
-	Parse(r *util.BinaryReader) *types.Exception
+	Parse(r *types.BinaryReader) *types.Exception
 	Encode() (*types.Buffer, *types.Exception)
+
+	GetTags() *MetaBlockTags
 }
 
-func (m *MetaBlock) Parse(br *util.BinaryReader) (bool, *types.Exception) {
+func (m *MetaBlock) Parse(br *types.BinaryReader) (bool, *types.Exception) {
 	var blockHead uint64
 	var blockSize uint64
 
 	//头部
 	if blockHeadData, err := br.ReadBytes(1); err != nil {
-		//Throw
+		return true, types.NewException(TMFlac_CanNotParse_MetaBlockHead, nil, err)
 	} else {
-		blockHead = util.BytesToUInt64(blockHeadData)
+		blockHead = types.BytesToUInt64(blockHeadData)
 	}
 
 	//1bit 是否为最后一个数据块
@@ -50,7 +60,7 @@ func (m *MetaBlock) Parse(br *util.BinaryReader) (bool, *types.Exception) {
 	if blockSizeData, err := br.ReadBytes(3); err != nil {
 		return isLastFlag, types.NewException(TMFlac_CanNotParse_MetaBlockSIZE, nil, err)
 	} else {
-		blockSize = util.BytesToUInt64(blockSizeData)
+		blockSize = types.BytesToUInt64(blockSizeData)
 	}
 
 	//原始数据
@@ -64,10 +74,10 @@ func (m *MetaBlock) Parse(br *util.BinaryReader) (bool, *types.Exception) {
 		}
 	}
 
-	util.Throw(types.NewException(TMFlac_Parsed_MetaBlock, map[string]string{
-		"type":   strconv.Itoa(int(m.Type)),
+	types.Throw(types.NewException(TMFlac_Parsed_MetaBlock, map[string]string{
+		"type":   m.GetTypeStr(true),
 		"length": fmt.Sprintf("%08d", blockSize),
-	}, nil), util.RsNotify)
+	}, nil), types.RsInfo)
 
 	return isLastFlag, nil
 }
@@ -90,7 +100,7 @@ func (m *MetaBlock) ParseBody(data []byte) (MetaBlockBody, *types.Exception) {
 
 	}
 
-	err := body.Parse(util.NewBinaryReader(r))
+	err := body.Parse(types.NewBinaryReader(r))
 
 	return body, err
 }
@@ -105,7 +115,7 @@ func (m *MetaBlock) Encode(isLast bool) (*types.Buffer, *types.Exception) {
 		blockHead = uint8(m.Type)
 	}
 
-	if blockHeadBytes, err := util.UIntToBytes(uint64(blockHead), 1); err != nil {
+	if blockHeadBytes, err := types.UIntToBytes(uint64(blockHead), 1); err != nil {
 		return nil, types.NewException(TMFlac_CanNotEncode_MetaBlockHead, nil, err)
 	} else if _, err := buffer.Write(blockHeadBytes); err != nil {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaBlockHead, nil, err)
@@ -120,13 +130,13 @@ func (m *MetaBlock) Encode(isLast bool) (*types.Buffer, *types.Exception) {
 		bodyData = bodyDataDumped
 	}
 
-	if blockBodySizeBytes, err := util.UIntToBytes(uint64(len(bodyData)), 3); err != nil {
+	if blockBodySizeBytes, err := types.UIntToBytes(uint64(len(bodyData)), 3); err != nil {
 		return nil, types.NewException(TMFlac_CanNotEncode_MetaBlockBodySize, nil, err)
 	} else if _, err := buffer.Write(blockBodySizeBytes); err != nil {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaBlockBodySize, nil, err)
 	}
 
-	//dump, err := buffer.Dump()
+	//dump, err := buffer.DumpList()
 	//fmt.Printf("%08b\t%v", dump, err)
 
 	if _, err := buffer.Write(bodyData); err != nil {
@@ -134,4 +144,26 @@ func (m *MetaBlock) Encode(isLast bool) (*types.Buffer, *types.Exception) {
 	}
 
 	return buffer, nil
+}
+
+func (m *MetaBlock) GetTypeStr(extend bool) string {
+	typeStr := ""
+	switch m.Type {
+	case MetaBlockType_STREAMINFO:
+		typeStr = MetaBlockTypeStr_STREAMINFO
+	case MetaBlockType_PADDING:
+		typeStr = MetaBlockTypeStr_PADDING
+	case MetaBlockType_APPLICATION:
+		typeStr = MetaBlockTypeStr_APPLICATION
+	case MetaBlockType_SEEKTABLE:
+		typeStr = MetaBlockTypeStr_SEEKTABLE
+	case MetaBlockType_VORBIS_COMMENT:
+		typeStr = MetaBlockTypeStr_VORBIS_COMMENT
+	case MetaBlockType_CUESHEET:
+		typeStr = MetaBlockTypeStr_CUESHEET
+	case MetaBlockType_PICTURE:
+		typeStr = MetaBlockTypeStr_PICTURE
+	}
+
+	return typeStr
 }

@@ -1,10 +1,9 @@
-package util
+package types
 
 import (
 	"flag"
 	"fmt"
 	"log"
-	"p20190417/types"
 	"time"
 )
 
@@ -48,7 +47,7 @@ func severity2Str(s Severity) string {
 }
 
 func Throw(t Throwable, severity Severity) {
-	message := types.WrappedMessage(
+	message := WrappedMessage(
 		fmt.Sprintf("[%d][%s]", time.Now().Unix(), severity2Str(severity)),
 		t.GetMessage(uint(severity)&*ThrowableTraceLevel > 0),
 		false,
