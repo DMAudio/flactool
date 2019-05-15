@@ -4,7 +4,7 @@ TASKS:
       - OPER: setRefer
         ARGS: "Digimon Audiopedia Database Project®"
       - OPER: printRefer
-#
+
 #  - OWNER: VORBIS_COMMENT
 #    LIST:
 #      - OPER: dumpTags
@@ -18,12 +18,12 @@ TASKS:
 #      - OPER: deleteTags
 #        ARGS: [ALBUM,ARTIST,CAT#]
 #      - OPER: printTags
-#
+
 #  - OWNER: VORBIS_COMMENT
 #    LIST:
 #      - OPER: sortTags
 #        ARGS: [ARTIST, TITLE, ALBUM, DATE, GENRE, TRACKNUMBER, TRACKTOTAL,
-#               DISCNUMBER, DISCTOTAL, EAN-13, CAT#, ...]
+#               DISCNUMBER, DISCTOTAL, EAN-13, CAT#]
 #      - OPER: printTags
 
 
@@ -31,17 +31,20 @@ TASKS:
 #    LIST:
 #      - OPER: dumpPic
 #        ARGS:
-#          - "3->pic_type3.png"
-#          - "6->pic_type6.png"
+#          - "PICTURE:body.type=3 -> pic_type3.png"
+#          - "PICTURE:body.type=6 -> pic_type6.png"
+#      - OPER: setPicType
+#        ARGS:
+#          - "PICTURE:body.fileSize=692662 -> 3"
+#          - "PICTURE:body.fileSize=570226 -> 6"
 #
-#  - OWNER: BLOCKS
-#    LIST:
-#      - OPER: deleteBlocks
-#        ARGS:
-#          - PICTURE:6...
-#      - OPER: sortBlocks
-#        ARGS:
-#          - STREAMINFO
-#          - VORBIS_COMMENT
-#          - PICTURE:6...
-#          - PICTURE:3...
+  - OWNER: BLOCKS
+    LIST:
+      - OPER: deleteBlocks
+        ARGS:
+          - PICTURE:body.fileSize=570226
+      - OPER: sortBlocks
+        ARGS:
+          - STREAMINFO
+          - VORBIS_COMMENT
+          - ...

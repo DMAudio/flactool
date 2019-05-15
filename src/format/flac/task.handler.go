@@ -1,8 +1,15 @@
 package flac
 
 import (
+	"p20190417/task"
 	"p20190417/types"
 )
+
+func TaskHandler_Exception_UnsupportedTask(operation string) *types.Exception {
+	return types.NewException(task.TMConfig_Unsupported_TaskOperation, map[string]string{
+		"operation": operation,
+	}, nil)
+}
 
 const TaskHandler_T4VORB_Key = MetaBlockTypeStr_VORBIS_COMMENT
 
@@ -25,7 +32,7 @@ func TaskHandler_T4VORB(operation string, args interface{}) (interface{}, *types
 	case "sortTags":
 		return TaskHandler_T4VORB_SortTags(args)
 	default:
-		return nil, nil
+		return nil, TaskHandler_Exception_UnsupportedTask(operation)
 	}
 }
 
@@ -38,7 +45,7 @@ func TaskHandler_T6PICT(operation string, args interface{}) (interface{}, *types
 	case "setPic":
 		return TaskHandler_T6PICT_setPic(args)
 	default:
-		return nil, nil
+		return nil, TaskHandler_Exception_UnsupportedTask(operation)
 	}
 }
 
@@ -48,10 +55,9 @@ func TaskHandler_BLOCKS(operation string, args interface{}) (interface{}, *types
 	switch operation {
 	case "sortBlocks":
 		return TaskHandler_MAIN_SortBlocks(args)
-	//case "deleteBlocks":
-	//	return TaskHandler_MAIN_DeleteBlocks(args)
+	case "deleteBlocks":
+		return TaskHandler_MAIN_DeleteBlocks(args)
 	default:
-		return nil, nil
+		return nil, TaskHandler_Exception_UnsupportedTask(operation)
 	}
 }
-

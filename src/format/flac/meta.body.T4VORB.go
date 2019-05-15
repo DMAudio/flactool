@@ -108,5 +108,11 @@ func (mb *MetaBlockT4VORB) Comments() *types.SSListedMap {
 func (mb *MetaBlockT4VORB) GetTags() *MetaBlockTags {
 	m := NewMetaBlockTags()
 
+	if comments, err := mb.Comments().DumpMap(); err == nil {
+		for commentKey, commentValue := range comments {
+			m.Set(commentKey, commentValue, nil)
+		}
+	}
+
 	return m
 }

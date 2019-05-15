@@ -189,6 +189,11 @@ var TMFlac_CanNotDump_MetaT4CommentList = types.NewMask(
 	"无法导出VORBIS_COMMENT的Comment列表",
 )
 
+var TMFlac_CanNotAssert_METABLOCKAsSpecificType = types.NewMask(
+	"CAN_NOT_ASSERT_METABLOCK_AS_SpecificType",
+	"断言第 {{index}} 个元数据块为 {{type}} 类型失败",
+)
+
 var TMFlac_CanNotRead_MetaT6Type = types.NewMask(
 	"CAN_NOT_READ_META_T6_Type",
 	"无法读取PICTURE的类型",

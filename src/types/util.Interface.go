@@ -32,6 +32,9 @@ func InterfaceToStringSlice(input interface{}) ([]string, *Exception) {
 	} else {
 		result := make([]string, 0)
 		for inputIndex, inputRaw := range inputSliceParsed {
+			if inputRaw == nil {
+				continue
+			}
 			if inputParsed, ok := inputRaw.(string); !ok {
 				return nil, SliceItem_Parsed_Failed(inputIndex,
 					Mismatched_Format_Exception("string",

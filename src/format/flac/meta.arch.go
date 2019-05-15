@@ -3,7 +3,9 @@ package flac
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"p20190417/types"
+	"strings"
 )
 
 type MetaBlockType uint8
@@ -26,11 +28,13 @@ const (
 	MetaBlockTypeStr_VORBIS_COMMENT = "VORBIS_COMMENT"
 	MetaBlockTypeStr_CUESHEET       = "CUESHEET"
 	MetaBlockTypeStr_PICTURE        = "PICTURE"
+
+	MetaBlockTypeStr_UNKNOWN = "UNKNOWN"
 )
 
 type MetaBlock struct {
-	Type MetaBlockType
-	Body MetaBlockBody
+	blockType MetaBlockType
+	blockBody MetaBlockBody
 }
 
 type MetaBlockBody interface {
@@ -54,7 +58,7 @@ func (m *MetaBlock) Parse(br *types.BinaryReader) (bool, *types.Exception) {
 	//1bit 是否为最后一个数据块
 	isLastFlag := blockHead>>7 == 1
 	//7bit 数据块类型
-	m.Type = MetaBlockType(uint8(blockHead & 0x7F))
+	m.blockType = MetaBlockType(uint8(blockHead & 0x7F))
 
 	//数据长度 3byte
 	if blockSizeData, err := br.ReadBytes(3); err != nil {
@@ -70,12 +74,12 @@ func (m *MetaBlock) Parse(br *types.BinaryReader) (bool, *types.Exception) {
 		if blockBody, err := m.ParseBody(blockData); err != nil {
 			return isLastFlag, types.NewException(TMFlac_CanNotParse_MetaBlockData, nil, err)
 		} else {
-			m.Body = blockBody
+			m.blockBody = blockBody
 		}
 	}
 
 	types.Throw(types.NewException(TMFlac_Parsed_MetaBlock, map[string]string{
-		"type":   m.GetTypeStr(true),
+		"type":   m.GetTypeStr(),
 		"length": fmt.Sprintf("%08d", blockSize),
 	}, nil), types.RsInfo)
 
@@ -86,7 +90,7 @@ func (m *MetaBlock) ParseBody(data []byte) (MetaBlockBody, *types.Exception) {
 	var body MetaBlockBody
 	r := bytes.NewReader(data)
 
-	switch m.Type {
+	switch m.blockType {
 	//case MetaBlockType_STREAMINFO:
 	//	body = &MetaBlockT0STRE{}
 	case MetaBlockType_PADDING:
@@ -110,9 +114,9 @@ func (m *MetaBlock) Encode(isLast bool) (*types.Buffer, *types.Exception) {
 
 	var blockHead uint8
 	if isLast {
-		blockHead = uint8(1<<7 | m.Type)
+		blockHead = uint8(1<<7 | m.blockType)
 	} else {
-		blockHead = uint8(m.Type)
+		blockHead = uint8(m.blockType)
 	}
 
 	if blockHeadBytes, err := types.UIntToBytes(uint64(blockHead), 1); err != nil {
@@ -122,7 +126,7 @@ func (m *MetaBlock) Encode(isLast bool) (*types.Buffer, *types.Exception) {
 	}
 
 	var bodyData []byte
-	if bodyDataBuffer, err := m.Body.Encode(); err != nil {
+	if bodyDataBuffer, err := m.blockBody.Encode(); err != nil {
 		return nil, types.NewException(TMFlac_CanNotEncode_MetaBlockData, nil, err)
 	} else if bodyDataDumped, err := bodyDataBuffer.Dump(); err != nil {
 		return nil, types.NewException(TMFlac_CanNotDump_MetaBlockData, nil, err)
@@ -146,24 +150,77 @@ func (m *MetaBlock) Encode(isLast bool) (*types.Buffer, *types.Exception) {
 	return buffer, nil
 }
 
-func (m *MetaBlock) GetTypeStr(extend bool) string {
-	typeStr := ""
-	switch m.Type {
+func (m *MetaBlock) GetType() MetaBlockType {
+	return m.blockType
+}
+
+func (m *MetaBlock) GetTypeStr() string {
+	switch m.blockType {
 	case MetaBlockType_STREAMINFO:
-		typeStr = MetaBlockTypeStr_STREAMINFO
+		return MetaBlockTypeStr_STREAMINFO
 	case MetaBlockType_PADDING:
-		typeStr = MetaBlockTypeStr_PADDING
+		return MetaBlockTypeStr_PADDING
 	case MetaBlockType_APPLICATION:
-		typeStr = MetaBlockTypeStr_APPLICATION
+		return MetaBlockTypeStr_APPLICATION
 	case MetaBlockType_SEEKTABLE:
-		typeStr = MetaBlockTypeStr_SEEKTABLE
+		return MetaBlockTypeStr_SEEKTABLE
 	case MetaBlockType_VORBIS_COMMENT:
-		typeStr = MetaBlockTypeStr_VORBIS_COMMENT
+		return MetaBlockTypeStr_VORBIS_COMMENT
 	case MetaBlockType_CUESHEET:
-		typeStr = MetaBlockTypeStr_CUESHEET
+		return MetaBlockTypeStr_CUESHEET
 	case MetaBlockType_PICTURE:
-		typeStr = MetaBlockTypeStr_PICTURE
+		return MetaBlockTypeStr_PICTURE
+	default:
+		return MetaBlockTypeStr_UNKNOWN
+	}
+}
+
+func (m *MetaBlock) GetBody() MetaBlockBody {
+	return m.blockBody
+}
+
+func (m *MetaBlock) MatchesPattern(patternRaw string, extraTags map[string]*MetaBlockTags) bool {
+	patternSplit := strings.SplitN(patternRaw, ":", 2)
+
+	if blockType := patternSplit[0]; blockType != m.GetTypeStr() {
+		return false
 	}
 
-	return typeStr
+	var filters map[string][]string
+	if len(patternSplit) == 2 {
+		if filtersTmp, err := url.ParseQuery(patternSplit[1]); err != nil {
+			panic(err)
+		} else {
+			filters = filtersTmp
+		}
+	}
+
+	if len(filters) == 0 {
+		return true
+	}
+
+	var bodyTags *MetaBlockTags
+
+	for key, values := range filters {
+		if strings.HasPrefix(key, "body.") {
+			if bodyTags == nil {
+				bodyTags = m.GetBody().GetTags()
+			}
+			if !bodyTags.Match(strings.TrimPrefix(key, "body."), values) {
+				return false
+			}
+			continue
+		}
+
+		for prefix, matcher := range extraTags {
+			if !strings.HasPrefix(key, prefix+".") {
+				continue
+			}
+			if !matcher.Match(strings.TrimPrefix(key, prefix+"."), values) {
+				return false
+			}
+		}
+	}
+
+	return true
 }

@@ -7,6 +7,7 @@ import (
 	"p20190417/types"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -24,11 +25,16 @@ func TaskHandler_T4VORB_GetBody() (*MetaBlockT4VORB, *types.Exception) {
 				return nil, types.NewException(TMFlac_UninitializedObject, nil, nil)
 			}
 
-			for _, block := range globalFlac.MetaBlocks {
-				if block.Type != MetaBlockType_VORBIS_COMMENT {
+			for blockIndex, block := range globalFlac.GetBlocks() {
+				if block.blockType != MetaBlockType_VORBIS_COMMENT {
 					continue
 				}
-				if blockBody, ok := block.Body.(*MetaBlockT4VORB); ok {
+				if blockBody, ok := block.GetBody().(*MetaBlockT4VORB); !ok {
+					return nil, types.NewException(TMFlac_CanNotAssert_METABLOCKAsSpecificType, map[string]string{
+						"index": strconv.Itoa(blockIndex),
+						"type":  "MetaBlockT4VORB",
+					}, nil)
+				} else {
 					t4VORB_Body = blockBody
 					return t4VORB_Body, nil
 				}

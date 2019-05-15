@@ -29,6 +29,11 @@ var TMConfig_UnableToParse_TaskItem = types.NewMask(
 	"无法解析第 {{task}} 个任务",
 )
 
+var TMConfig_Unsupported_TaskOperation = types.NewMask(
+	"UNSUPPORTED_TASK_OPERATION",
+	"操作名 {{operation}} 不被支持",
+)
+
 var TMConfig_UnableToParse_TaskFile = types.NewMask(
 	"UNABLE_TO_PARSE_TASK_FILE",
 	"无法解析任务文件：{{reason}}",

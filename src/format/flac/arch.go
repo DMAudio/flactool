@@ -10,8 +10,8 @@ import (
 
 type Flac struct {
 	//ID3v2      *PrependID3v2
-	MetaBlocks []*MetaBlock
-	Frames     []byte
+	blocks []*MetaBlock
+	frames []byte
 }
 
 var flacSignature = []byte("fLaC")
@@ -52,10 +52,10 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 		blockMeta := &MetaBlock{}
 		if isLast, err := blockMeta.Parse(br); err != nil {
 			return types.NewException(TMFlac_CanNotParse_MetaDataBlock, map[string]string{
-				"n": strconv.Itoa(len(fObj.MetaBlocks)),
+				"n": strconv.Itoa(len(fObj.blocks)),
 			}, err)
 		} else {
-			fObj.MetaBlocks = append(fObj.MetaBlocks, blockMeta)
+			fObj.blocks = append(fObj.blocks, blockMeta)
 			if isLast {
 				break
 			}
@@ -66,7 +66,7 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 	if FrameBytes, err := br.ReadAllFollowedBytes(); err != nil {
 		types.NewException(TMFlac_CanNotRead_Frames, nil, nil)
 	} else {
-		fObj.Frames = FrameBytes
+		fObj.frames = FrameBytes
 		types.Throw(types.NewException(TMFlac_Read_Frames, map[string]string{
 			"length": strconv.Itoa(len(FrameBytes)),
 		}, nil), types.RsInfo)
@@ -95,8 +95,8 @@ func (fObj *Flac) Encode() (*types.Buffer, *types.Exception) {
 		return nil, types.NewException(TMFlac_CanNotWrite_FileSignature, nil, err)
 	}
 
-	for bIndex, block := range fObj.MetaBlocks {
-		if dataBuffer, err := block.Encode(bIndex == len(fObj.MetaBlocks)-1); err != nil {
+	for bIndex, block := range fObj.blocks {
+		if dataBuffer, err := block.Encode(bIndex == len(fObj.blocks)-1); err != nil {
 			return nil, types.NewException(TMFlac_CanNotEncode_MetaDataBlock, map[string]string{
 				"n": strconv.Itoa(bIndex),
 			}, err)
@@ -111,7 +111,7 @@ func (fObj *Flac) Encode() (*types.Buffer, *types.Exception) {
 		}
 	}
 
-	if _, err := buffer.Write(fObj.Frames); err != nil {
+	if _, err := buffer.Write(fObj.frames); err != nil {
 		return nil, types.NewException(TMFlac_CanNotWrite_Frames, nil, err)
 	}
 
@@ -141,7 +141,31 @@ func (fObj *Flac) WriteToFile(path string) *types.Exception {
 }
 
 func (fObj *Flac) Initialized() bool {
-	return fObj.MetaBlocks != nil && fObj.Frames != nil
+	return fObj.blocks != nil && fObj.frames != nil
+}
+
+func (fObj *Flac) GetBlocks() []*MetaBlock {
+	return fObj.blocks
+}
+
+func (fObj *Flac) SetBlocks(blocks []*MetaBlock) {
+	fObj.blocks = blocks
+}
+
+func (fObj *Flac) FindBlock(pattern string) []int {
+	result := make([]int, 0)
+
+	for blockIndex, block := range fObj.blocks {
+		blockExtraTags := NewMetaBlockTags()
+		blockExtraTags.Set("index", strconv.Itoa(blockIndex), nil)
+		if block.MatchesPattern(pattern, map[string]*MetaBlockTags{
+			"block": blockExtraTags,
+		}) {
+			result = append(result, blockIndex)
+		}
+	}
+
+	return result
 }
 
 var globalFlac *Flac

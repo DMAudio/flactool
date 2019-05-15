@@ -3,17 +3,18 @@ package flac
 import (
 	"encoding/binary"
 	"p20190417/types"
+	"strconv"
 )
 
 type MetaBlockT6PICT struct {
-	picType   uint32
-	picMime   string
-	picDesc   string
-	picWidth  uint32
-	picHeight uint32
-	picCDepth uint32
-	picColors uint32
-	picData   []byte
+	picType        uint32
+	picMime        string
+	picDesc        string
+	picWidth       uint32
+	picHeight      uint32
+	picColorDepth  uint32
+	picColorAmount uint32
+	picFileRawData []byte
 }
 
 func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
@@ -66,14 +67,14 @@ func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
 	if ColorDepthData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6ColorDepth, nil, err)
 	} else {
-		mb.picCDepth = binary.BigEndian.Uint32(ColorDepthData)
+		mb.picColorDepth = binary.BigEndian.Uint32(ColorDepthData)
 	}
 
 	//色数(用于 GIF 等图片格式)
 	if ColorsData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6Colors, nil, err)
 	} else {
-		mb.picColors = binary.BigEndian.Uint32(ColorsData)
+		mb.picColorAmount = binary.BigEndian.Uint32(ColorsData)
 	}
 
 	//图片原始数据
@@ -84,7 +85,7 @@ func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
 		if PicData, err := r.ReadBytes(PicLength); err != nil {
 			return types.NewException(TMFlac_CanNotRead_MetaT6Data, nil, err)
 		} else {
-			mb.picData = PicData
+			mb.picFileRawData = PicData
 		}
 	}
 
@@ -133,36 +134,81 @@ func (mb *MetaBlockT6PICT) Encode() (*types.Buffer, *types.Exception) {
 	}
 
 	ColorDepth := make([]byte, 4)
-	binary.BigEndian.PutUint32(ColorDepth, uint32(mb.picCDepth))
+	binary.BigEndian.PutUint32(ColorDepth, uint32(mb.picColorDepth))
 	if length, err := buffer.Write(ColorDepth); err != nil || length != len(ColorDepth) {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaT6ColorDepth, nil, err)
 	}
 
 	Colors := make([]byte, 4)
-	binary.BigEndian.PutUint32(Colors, uint32(mb.picColors))
+	binary.BigEndian.PutUint32(Colors, uint32(mb.picColorAmount))
 	if length, err := buffer.Write(Colors); err != nil || length != len(Colors) {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaT6Colors, nil, err)
 	}
 
 	DataLength := make([]byte, 4)
-	binary.BigEndian.PutUint32(DataLength, uint32(len(mb.picData)))
+	binary.BigEndian.PutUint32(DataLength, uint32(len(mb.picFileRawData)))
 	if length, err := buffer.Write(DataLength); err != nil || length != len(DataLength) {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaT6DataLength, nil, err)
 	}
 
-	if length, err := buffer.Write(mb.picData); err != nil || length != len(mb.picData) {
+	if length, err := buffer.Write(mb.picFileRawData); err != nil || length != len(mb.picFileRawData) {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaT6Data, nil, err)
 	}
 
 	return buffer, nil
 }
 
-func (mb *MetaBlockT6PICT) GetPicType() int {
-	return int(mb.picType)
+func (mb *MetaBlockT6PICT) GetPicType() uint32 {
+	return mb.picType
+}
+
+func (mb *MetaBlockT6PICT) SetPicType(picType uint32) {
+	mb.picType = picType
+}
+
+func (mb *MetaBlockT6PICT) GetPicDesc() string {
+	return mb.picDesc
+}
+
+func (mb *MetaBlockT6PICT) GSetPicDesc(picDesc string) {
+	mb.picDesc = picDesc
+}
+
+func (mb *MetaBlockT6PICT) GetPicMime() string {
+	return mb.picMime
+}
+
+func (mb *MetaBlockT6PICT) GetPicWidth() uint32 {
+	return mb.picWidth
+}
+
+func (mb *MetaBlockT6PICT) GetPicHeight() uint32 {
+	return mb.picHeight
+}
+
+func (mb *MetaBlockT6PICT) GetPicColorDepth() uint32 {
+	return mb.picColorDepth
+}
+
+func (mb *MetaBlockT6PICT) GetPicColorAmount() uint32 {
+	return mb.picColorAmount
+}
+
+func (mb *MetaBlockT6PICT) GetPicRawData() []byte {
+	return mb.picFileRawData
 }
 
 func (mb *MetaBlockT6PICT) GetTags() *MetaBlockTags {
 	m := NewMetaBlockTags()
+
+	m.Set("type", strconv.FormatUint(uint64(mb.picType), 10), nil)
+	m.Set("mime", mb.picMime, nil)
+	m.Set("desc", mb.picDesc, nil)
+	m.Set("width", strconv.FormatUint(uint64(mb.picWidth), 10), nil)
+	m.Set("height", strconv.FormatUint(uint64(mb.picHeight), 10), nil)
+	m.Set("colorDepth", strconv.FormatUint(uint64(mb.picColorDepth), 10), nil)
+	m.Set("colorAmount", strconv.FormatUint(uint64(mb.picColorAmount), 10), nil)
+	m.Set("fileSize", strconv.Itoa(len(mb.picFileRawData)), nil)
 
 	return m
 }
