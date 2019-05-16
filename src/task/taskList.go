@@ -118,11 +118,11 @@ func ExecuteTasks() *types.Exception {
 			UnhandledErrInCollection := map[string]*types.Exception{}
 			for tIndex, task := range collection.List {
 				if err := GlobalHandler().Execute(collection.Owner, task.Operation, task.Arguments); err != nil {
-					UnhandledErrInCollection[strconv.Itoa(tIndex)] = err
+					UnhandledErrInCollection["T"+strconv.Itoa(tIndex)] = err
 				}
 			}
 			if len(UnhandledErrInCollection) > 0 {
-				UnhandledErr[strconv.Itoa(cIndex)] = types.NewException(TMTask_Collection_UnhandledThrowable, map[string]string{
+				UnhandledErr["C"+strconv.Itoa(cIndex)] = types.NewException(TMTask_Collection_UnhandledThrowable, map[string]string{
 					"collection": strconv.Itoa(cIndex),
 					"handler":    collection.Owner,
 				}, UnhandledErrInCollection)

@@ -30,7 +30,7 @@ func (mb *MetaBlockT1PADD) Encode() (*types.Buffer, *types.Exception) {
 func (mb *MetaBlockT1PADD) GetTags() *MetaBlockTags {
 	m := NewMetaBlockTags()
 
-	m.SetData("BodyLength", strconv.Itoa(len(mb.data)))
+	m.Set("BodyLength", strconv.Itoa(len(mb.data)), nil)
 
 	return m
 }

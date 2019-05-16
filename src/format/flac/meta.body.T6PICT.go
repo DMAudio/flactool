@@ -15,6 +15,7 @@ type MetaBlockT6PICT struct {
 	picColorDepth  uint32
 	picColorAmount uint32
 	picFileRawData []byte
+	bodyTag        *MetaBlockTags
 }
 
 func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
@@ -199,16 +200,18 @@ func (mb *MetaBlockT6PICT) GetPicRawData() []byte {
 }
 
 func (mb *MetaBlockT6PICT) GetTags() *MetaBlockTags {
-	m := NewMetaBlockTags()
+	if mb.bodyTag == nil {
+		mb.bodyTag = NewMetaBlockTags()
+	}
 
-	m.Set("type", strconv.FormatUint(uint64(mb.picType), 10), nil)
-	m.Set("mime", mb.picMime, nil)
-	m.Set("desc", mb.picDesc, nil)
-	m.Set("width", strconv.FormatUint(uint64(mb.picWidth), 10), nil)
-	m.Set("height", strconv.FormatUint(uint64(mb.picHeight), 10), nil)
-	m.Set("colorDepth", strconv.FormatUint(uint64(mb.picColorDepth), 10), nil)
-	m.Set("colorAmount", strconv.FormatUint(uint64(mb.picColorAmount), 10), nil)
-	m.Set("fileSize", strconv.Itoa(len(mb.picFileRawData)), nil)
+	mb.bodyTag.Set("type", strconv.FormatUint(uint64(mb.picType), 10), nil)
+	mb.bodyTag.Set("mime", mb.picMime, nil)
+	mb.bodyTag.Set("desc", mb.picDesc, nil)
+	mb.bodyTag.Set("width", strconv.FormatUint(uint64(mb.picWidth), 10), nil)
+	mb.bodyTag.Set("height", strconv.FormatUint(uint64(mb.picHeight), 10), nil)
+	mb.bodyTag.Set("colorDepth", strconv.FormatUint(uint64(mb.picColorDepth), 10), nil)
+	mb.bodyTag.Set("colorAmount", strconv.FormatUint(uint64(mb.picColorAmount), 10), nil)
+	mb.bodyTag.Set("fileSize", strconv.Itoa(len(mb.picFileRawData)), nil)
 
-	return m
+	return mb.bodyTag
 }

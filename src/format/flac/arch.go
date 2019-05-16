@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"p20190417/types"
+	"p20190417/utils"
 	"strconv"
 	"sync"
 )
@@ -61,6 +62,8 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 			}
 		}
 	}
+
+	fObj.SetMetaParams()
 
 	//读取Frames
 	if FrameBytes, err := br.ReadAllFollowedBytes(); err != nil {
@@ -122,22 +125,29 @@ func (fObj *Flac) WriteToFile(path string) *types.Exception {
 	var fileBytes []byte
 
 	if dataBuffer, err := fObj.Encode(); err != nil {
-		return types.NewException(TMFlac_CanNotWrite_File, nil, err)
+		return types.NewException(TMFlac_CanNotSaveTo_File, nil, err)
 	} else if dataDumped, err := dataBuffer.Dump(); err != nil {
-		return types.NewException(TMFlac_CanNotWrite_File, nil, err)
+		return types.NewException(TMFlac_CanNotSaveTo_File, nil, err)
 	} else {
 		fileBytes = dataDumped
 	}
 
-	if file, err := os.Create(path); err != nil {
-		panic(err)
-	} else {
-		defer func() { _ = file.Close() }()
-		if _, err := file.Write(fileBytes); err != nil {
-			return types.NewException(TMFlac_CanNotWrite_File, nil, err)
+	if err := utils.FileWriteBytes(path, fileBytes); err != nil {
+		return types.NewException(TMFlac_CanNotSaveTo_File, nil, err)
+	}
+
+	return nil
+}
+
+func (fObj *Flac) SetMetaParams() {
+	for blockIndex, block := range fObj.blocks {
+		block.GetTags().Set("index", strconv.Itoa(blockIndex), nil)
+		if blockIndex == len(fObj.blocks)-1 {
+			block.GetTags().Set("isLast", "true", TagMatcher_Bool)
+		} else {
+			block.GetTags().Set("isLast", "false", TagMatcher_Bool)
 		}
 	}
-	return nil
 }
 
 func (fObj *Flac) Initialized() bool {
@@ -150,22 +160,45 @@ func (fObj *Flac) GetBlocks() []*MetaBlock {
 
 func (fObj *Flac) SetBlocks(blocks []*MetaBlock) {
 	fObj.blocks = blocks
+	fObj.SetMetaParams()
 }
 
-func (fObj *Flac) FindBlock(pattern string) []int {
+func (fObj *Flac) FindBlocks(pattern string) []int {
 	result := make([]int, 0)
 
 	for blockIndex, block := range fObj.blocks {
-		blockExtraTags := NewMetaBlockTags()
-		blockExtraTags.Set("index", strconv.Itoa(blockIndex), nil)
-		if block.MatchesPattern(pattern, map[string]*MetaBlockTags{
-			"block": blockExtraTags,
-		}) {
+		if block.MatchesPattern(pattern) {
 			result = append(result, blockIndex)
 		}
 	}
 
 	return result
+}
+
+func (fObj *Flac) GetBlockByIndex(index int) *MetaBlock {
+	if index >= 0 && index < len(fObj.blocks) {
+		return fObj.blocks[index]
+	}
+	return nil
+}
+
+func (fObj *Flac) GetBlocksByIndexSlice(indexes []int) []*MetaBlock {
+	blocks := make([]*MetaBlock, 0)
+	for _, index := range indexes {
+		if index >= 0 && index < len(fObj.blocks) {
+			blocks = append(blocks, fObj.blocks[index])
+		}
+	}
+	return blocks
+}
+
+func (fObj *Flac) GetBlockIndex(ptr *MetaBlock) int {
+	for blockIndex, blockPtr := range fObj.blocks {
+		if blockPtr == ptr {
+			return blockIndex
+		}
+	}
+	return -1
 }
 
 var globalFlac *Flac
@@ -180,4 +213,13 @@ func GlobalFlac() *Flac {
 		}
 	}
 	return globalFlac
+}
+
+func GlobalFlacInit() (*Flac, *types.Exception) {
+	var globalFlac *Flac
+	if globalFlac = GlobalFlac(); globalFlac == nil || !globalFlac.Initialized() {
+		return nil, types.NewException(TMFlac_UninitializedObject, nil, nil)
+	}
+
+	return globalFlac, nil
 }

@@ -48,3 +48,28 @@ var TMTask_UnhandledThrowable = types.NewMask(
 	"UNHANDLED_THROWABLE_OCCURRED",
 	"执行 任务配置文件 时产生了若干个未被处理的错误:",
 )
+
+var TMFilter_UnableToParse_Arg = types.NewMask(
+	"UNABLE_TO_PARSE_ARG",
+	"参数解析失败：{{reason}}",
+)
+
+var TMFilter_Undefined_Handler = types.NewMask(
+	"Undefined_Handler",
+	"未定义的处理者：{{handler}}",
+)
+
+var TMFilter_FailedToExecute_Filter = types.NewMask(
+	"Failed_To_Execute_Filter",
+	"Filter执行失败（执行者：{{handler}}，参数：{{args}}）",
+)
+
+var TMFilter_FailedToFill_Args = types.NewMask(
+	"Failed_To_Fill_Args",
+	"参数填充失败",
+)
+
+var TMFilter_CanNotRegister = types.NewMask(
+	"CAN_NOT_REGISTER_Filter",
+	"无法注册执行者: {{reason}}",
+)

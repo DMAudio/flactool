@@ -5,46 +5,47 @@ TASKS:
         ARGS: "Digimon Audiopedia Database Project®"
       - OPER: printRefer
 
-#  - OWNER: VORBIS_COMMENT
-#    LIST:
+  - OWNER: VORBIS_COMMENT
+    LIST:
 #      - OPER: dumpTags
-#        ARGS: "tags.txt"
+#        ARGS: tags.txt
 #      - OPER: importTags
-#        ARGS: "tags.txt"
+#        ARGS: tags.txt
 #      - OPER: setTags
 #        ARGS:
-#          - "ALBUM=balabalabla"
-#          - "ARTIST=BALABALABA"
+#          - ALBUM=balabalabla
+#          - ARTIST=BALABALABA
 #      - OPER: deleteTags
 #        ARGS: [ALBUM,ARTIST,CAT#]
-#      - OPER: printTags
-
+      - OPER: printTags
+#
 #  - OWNER: VORBIS_COMMENT
 #    LIST:
 #      - OPER: sortTags
 #        ARGS: [ARTIST, TITLE, ALBUM, DATE, GENRE, TRACKNUMBER, TRACKTOTAL,
 #               DISCNUMBER, DISCTOTAL, EAN-13, CAT#]
 #      - OPER: printTags
-
-
-#  - OWNER: PICTURE
-#    LIST:
-#      - OPER: dumpPic
-#        ARGS:
-#          - "PICTURE:body.type=3 -> pic_type3.png"
-#          - "PICTURE:body.type=6 -> pic_type6.png"
-#      - OPER: setPicType
-#        ARGS:
-#          - "PICTURE:body.fileSize=692662 -> 3"
-#          - "PICTURE:body.fileSize=570226 -> 6"
 #
-  - OWNER: BLOCKS
+#
+  - OWNER: PICTURE
     LIST:
-      - OPER: deleteBlocks
+      - OPER: setPicType
         ARGS:
-          - PICTURE:body.fileSize=570226
-      - OPER: sortBlocks
+          - "PICTURE:body.fileSize=692662 -> 1"
+          - "PICTURE:body.fileSize=570226 -> 1"
+      - OPER: dumpPic
         ARGS:
-          - STREAMINFO
-          - VORBIS_COMMENT
-          - ...
+          - PICTURE -> {@flac:VORBIS_COMMENT->body.CAT#}_block{@flac:this->index}_type{@flac:this->body.type}.png
+          - PICTURE:body.type=3 -> {@flac:VORBIS_COMMENT->body.CAT#}.{@flac:this->body.type}.png
+
+
+#  - OWNER: BLOCKS
+#    LIST:
+#      - OPER: deleteBlocks
+#        ARGS:
+#          - PICTURE:body.fileSize=570226
+#      - OPER: sortBlocks
+#        ARGS:
+#          - STREAMINFO
+#          - VORBIS_COMMENT
+#          - ...

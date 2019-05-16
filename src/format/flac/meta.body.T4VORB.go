@@ -10,6 +10,7 @@ import (
 type MetaBlockT4VORB struct {
 	refer    string
 	comments *types.SSListedMap
+	bodyTag  *MetaBlockTags
 }
 
 func (mb *MetaBlockT4VORB) Parse(r *types.BinaryReader) *types.Exception {
@@ -98,21 +99,43 @@ func (mb *MetaBlockT4VORB) GetRefer() string {
 }
 
 func (mb *MetaBlockT4VORB) SetRefer(referText string) {
+	defer mb.clearTagCache()
 	mb.refer = referText
 }
 
-func (mb *MetaBlockT4VORB) Comments() *types.SSListedMap {
-	return mb.comments
+func (mb *MetaBlockT4VORB) SetComment(Key string, Value string, actionIfNotExist types.SSListedMapAction) *types.Exception {
+	defer mb.clearTagCache()
+	return mb.comments.Set(Key, Value, actionIfNotExist)
+}
+
+func (mb *MetaBlockT4VORB) SortComment(sortBy []string) {
+	defer mb.clearTagCache()
+	mb.comments.Sort(sortBy)
+}
+
+func (mb *MetaBlockT4VORB) DeleteComment(Key string) *types.Exception {
+	defer mb.clearTagCache()
+	return mb.comments.Delete(Key)
+}
+
+func (mb *MetaBlockT4VORB) DumpCommentList() ([][2]string, *types.Exception) {
+	return mb.comments.DumpList()
 }
 
 func (mb *MetaBlockT4VORB) GetTags() *MetaBlockTags {
-	m := NewMetaBlockTags()
+	if mb.bodyTag == nil {
+		mb.bodyTag = NewMetaBlockTags()
+	}
 
-	if comments, err := mb.Comments().DumpMap(); err == nil {
+	if comments, err := mb.comments.DumpMap(); err == nil {
 		for commentKey, commentValue := range comments {
-			m.Set(commentKey, commentValue, nil)
+			mb.bodyTag.Set(commentKey, commentValue, nil)
 		}
 	}
 
-	return m
+	return mb.bodyTag
+}
+
+func (mb *MetaBlockT4VORB) clearTagCache() {
+	mb.bodyTag = nil
 }

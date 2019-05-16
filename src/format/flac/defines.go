@@ -9,9 +9,10 @@ var TMFlac_CanNotOpen_File = types.NewMask(
 	"无法打开文件",
 )
 
-var TMFlac_CanNotWrite_File = types.NewMask(
-	"CANNOT_Write_FILE",
-	"无法写入文件",
+
+var TMFlac_CanNotSaveTo_File = types.NewMask(
+	"CANNOT_SaveTo_FILE",
+	"无法保存到文件",
 )
 
 var TMFlac_UninitializedObject = types.NewMask(
@@ -324,17 +325,17 @@ var TMFlac_Task_CanNotParse_FileAbsolutePath = types.NewMask(
 	"无法解析文件绝对路径",
 )
 
-var TMFlac_Task_CanNotOpen_File = types.NewMask(
-	"CAN_NOT_OPEN_FILE",
-	"无法打开文件",
+var TMFlac_Arg_CanNotFind_Block = types.NewMask(
+	"CAN_NOT_FIND_BLOCK",
+	"找不到数据块: {{pattern}}",
 )
 
-var TMFlac_Task_CanNotWriteTo_File = types.NewMask(
-	"CAN_NOT_WRITE_TO_FILE",
-	"无法写入文件",
+var TMFlac_Arg_VaguePattern = types.NewMask(
+	"Vague_Pattern",
+	"通过表达式筛选的数据块不唯一: {{pattern}}",
 )
 
-var TMFlac_Task_CanNotReadFrom_File = types.NewMask(
-	"CAN_NOT_READ_FROM_FILE",
-	"无法写入文件",
+var TMFlac_Arg_CanNotParseThisBlock = types.NewMask(
+	"Can_Not_Parse_ThisBlock",
+	"无法解析@this",
 )

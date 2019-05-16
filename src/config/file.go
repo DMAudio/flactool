@@ -12,7 +12,7 @@ func ParseConfig(cfgPath string) (map[string]interface{}, error) {
 	var err error
 	var cfgPathAbs string
 	if cfgPathAbs, err = filepath.Abs(strings.TrimSpace(cfgPath)); err != nil {
-		return nil, fmt.Errorf("无法解析配置文件路径")
+		return nil, err
 	}
 
 	file_base, file_name := filepath.Split(cfgPathAbs)
@@ -31,7 +31,7 @@ func ParseConfig(cfgPath string) (map[string]interface{}, error) {
 	cfg.SetConfigName(file_name)
 
 	if err := cfg.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("无法读取配置文件")
+		return nil, err
 	}
 	return cfg.AllSettings(), nil
 }

@@ -6,9 +6,10 @@ import (
 )
 
 func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exception) {
-	globalFlac := GlobalFlac()
-	if globalFlac == nil || !globalFlac.Initialized() {
-		return nil, types.NewException(TMFlac_UninitializedObject, nil, nil)
+	var err *types.Exception
+	var globalFlac *Flac
+	if globalFlac, err = GlobalFlacInit(); err != nil {
+		return "", err
 	}
 
 	var searchPatterns []string
@@ -34,7 +35,7 @@ func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exceptio
 		if pattern == "..." {
 			preserveUnMatchedBlocks = len(blockMatched) - 1
 		}
-		if blockIndexes := globalFlac.FindBlock(pattern); blockIndexes != nil && len(blockIndexes) != 0 {
+		if blockIndexes := globalFlac.FindBlocks(pattern); blockIndexes != nil && len(blockIndexes) != 0 {
 			for _, blockIndex := range blockIndexes {
 				if types.IListFindElement(blockMatched, blockIndex) > -1 {
 					continue
@@ -60,9 +61,10 @@ func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exceptio
 }
 
 func TaskHandler_MAIN_DeleteBlocks(args interface{}) (interface{}, *types.Exception) {
-	globalFlac := GlobalFlac()
-	if globalFlac == nil || !globalFlac.Initialized() {
-		return nil, types.NewException(TMFlac_UninitializedObject, nil, nil)
+	var err *types.Exception
+	var globalFlac *Flac
+	if globalFlac, err = GlobalFlacInit(); err != nil {
+		return "", err
 	}
 
 	var searchPatterns []string
@@ -79,7 +81,7 @@ func TaskHandler_MAIN_DeleteBlocks(args interface{}) (interface{}, *types.Except
 	}
 	for _, pattern := range searchPatterns {
 		pattern = strings.TrimSpace(pattern)
-		if blockIndexes := globalFlac.FindBlock(pattern); blockIndexes != nil && len(blockIndexes) != 0 {
+		if blockIndexes := globalFlac.FindBlocks(pattern); blockIndexes != nil && len(blockIndexes) != 0 {
 			for _, blockIndex := range blockIndexes {
 				blockUnMatched = types.IListDeleteByElement(blockUnMatched, blockIndex)
 			}
