@@ -61,8 +61,17 @@ type MetaBlock struct {
 type MetaBlockBody interface {
 	Parse(r *types.BinaryReader) *types.Exception
 	Encode() (*types.Buffer, *types.Exception)
-
+	GetType() MetaBlockType
 	GetTags() *MetaBlockTags
+}
+
+func NewMetaBlock(body MetaBlockBody) *MetaBlock {
+	m := MetaBlock{
+		blockBody: body,
+		blockType: body.GetType(),
+	}
+
+	return &m
 }
 
 func (m *MetaBlock) Parse(br *types.BinaryReader) (bool, *types.Exception) {

@@ -320,11 +320,6 @@ var TMFlac_CanNotWrite_Frames = types.NewMask(
 	"无法写入源数据",
 )
 
-var TMFlac_Task_CanNotParse_FileAbsolutePath = types.NewMask(
-	"CAN_NOT_PARSE_FILE_ABSOLUTE_PATH",
-	"无法解析文件绝对路径",
-)
-
 var TMFlac_Arg_CanNotFind_Block = types.NewMask(
 	"CAN_NOT_FIND_BLOCK",
 	"找不到数据块: {{pattern}}",

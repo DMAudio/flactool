@@ -60,11 +60,19 @@ func FileWriteString(path string, str string) *types.Exception {
 	return nil
 }
 
-func FileReadBytes(path string) ([]byte, *types.Exception) {
+func FileGetReader(path string) (*os.File, *types.Exception) {
 	if absPath, err := filepath.Abs(strings.TrimSpace(path)); err != nil {
 		return nil, types.NewException(TMFile_CanNotParse_FileAbsPath, nil, err)
 	} else if fileObj, err := os.OpenFile(absPath, os.O_RDONLY, 0644); err != nil {
 		return nil, types.NewException(TMFile_CanNotOpen_File, nil, nil)
+	} else {
+		return fileObj, nil
+	}
+}
+
+func FileReadBytes(path string) ([]byte, *types.Exception) {
+	if fileObj, err := FileGetReader(path); err != nil {
+		return nil, types.NewException(TMFile_CanNotRead_File, nil, nil)
 	} else {
 		defer func() {
 			_ = fileObj.Close()

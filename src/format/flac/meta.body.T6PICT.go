@@ -1,8 +1,17 @@
 package flac
 
 import (
+	"bytes"
 	"encoding/binary"
+	_ "golang.org/x/image/webp"
+	"image"
+	"image/color"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+	"mime"
 	"p20190417/types"
+	"p20190417/utils"
 	"strconv"
 )
 
@@ -14,7 +23,7 @@ type MetaBlockT6PICT struct {
 	picHeight      uint32
 	picColorDepth  uint32
 	picColorAmount uint32
-	picFileRawData []byte
+	picRawData     []byte
 	bodyTag        *MetaBlockTags
 }
 
@@ -86,8 +95,68 @@ func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
 		if PicData, err := r.ReadBytes(PicLength); err != nil {
 			return types.NewException(TMFlac_CanNotRead_MetaT6Data, nil, err)
 		} else {
-			mb.picFileRawData = PicData
+			mb.picRawData = PicData
 		}
+	}
+
+	return nil
+}
+
+func (mb *MetaBlockT6PICT) ParsePictureFile(path string) *types.Exception {
+	var err error
+	var exception *types.Exception
+
+	var picBytes []byte
+	if picBytes, exception = utils.FileReadBytes(path); exception != nil {
+		return exception
+	}
+	var imgObj image.Image
+	var imgFormat string
+	if imgObj, imgFormat, err = image.Decode(bytes.NewReader(picBytes)); err != nil {
+		return types.NewException(TMFlac_CanNotRead_MetaT6Data, nil, exception)
+	}
+
+	mb.picMime = mime.TypeByExtension("." + imgFormat)
+	mb.picWidth = uint32(imgObj.Bounds().Size().X)
+	mb.picHeight = uint32(imgObj.Bounds().Size().Y)
+	mb.picRawData = picBytes
+
+	var imgColorModel color.Model
+	imgColorModel = imgObj.ColorModel()
+
+	switch imgColorModel.(type) {
+	case color.Palette:
+		mb.picColorAmount = uint32(len(imgColorModel.(color.Palette)))
+	default:
+		mb.picColorAmount = 0
+	}
+
+	switch imgObj.At(0, 0).(type) {
+	case color.Alpha:
+		mb.picColorDepth = 8
+	case color.Alpha16:
+		mb.picColorDepth = 16
+	case color.CMYK:
+		mb.picColorDepth = 4 * 8
+	case color.Gray:
+		mb.picColorDepth = 8
+	case color.Gray16:
+		mb.picColorDepth = 16
+	case color.NRGBA:
+		mb.picColorDepth = 4 * 8
+	case color.NRGBA64:
+		mb.picColorDepth = 4 * 16
+	case color.NYCbCrA:
+		mb.picColorDepth = 4 * 8
+	case color.RGBA:
+		mb.picColorDepth = 4 * 8
+	case color.RGBA64:
+		mb.picColorDepth = 4 * 16
+	case color.YCbCr:
+		mb.picColorDepth = 3 * 8
+	default:
+		mb.picColorDepth = 0
+
 	}
 
 	return nil
@@ -147,12 +216,12 @@ func (mb *MetaBlockT6PICT) Encode() (*types.Buffer, *types.Exception) {
 	}
 
 	DataLength := make([]byte, 4)
-	binary.BigEndian.PutUint32(DataLength, uint32(len(mb.picFileRawData)))
+	binary.BigEndian.PutUint32(DataLength, uint32(len(mb.picRawData)))
 	if length, err := buffer.Write(DataLength); err != nil || length != len(DataLength) {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaT6DataLength, nil, err)
 	}
 
-	if length, err := buffer.Write(mb.picFileRawData); err != nil || length != len(mb.picFileRawData) {
+	if length, err := buffer.Write(mb.picRawData); err != nil || length != len(mb.picRawData) {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaT6Data, nil, err)
 	}
 
@@ -171,7 +240,7 @@ func (mb *MetaBlockT6PICT) GetPicDesc() string {
 	return mb.picDesc
 }
 
-func (mb *MetaBlockT6PICT) GSetPicDesc(picDesc string) {
+func (mb *MetaBlockT6PICT) SetPicDesc(picDesc string) {
 	mb.picDesc = picDesc
 }
 
@@ -196,7 +265,11 @@ func (mb *MetaBlockT6PICT) GetPicColorAmount() uint32 {
 }
 
 func (mb *MetaBlockT6PICT) GetPicRawData() []byte {
-	return mb.picFileRawData
+	return mb.picRawData
+}
+
+func (mb *MetaBlockT6PICT) GetType() MetaBlockType {
+	return MetaBlockType_PICTURE
 }
 
 func (mb *MetaBlockT6PICT) GetTags() *MetaBlockTags {
@@ -211,7 +284,7 @@ func (mb *MetaBlockT6PICT) GetTags() *MetaBlockTags {
 	mb.bodyTag.Set("height", strconv.FormatUint(uint64(mb.picHeight), 10), nil)
 	mb.bodyTag.Set("colorDepth", strconv.FormatUint(uint64(mb.picColorDepth), 10), nil)
 	mb.bodyTag.Set("colorAmount", strconv.FormatUint(uint64(mb.picColorAmount), 10), nil)
-	mb.bodyTag.Set("fileSize", strconv.Itoa(len(mb.picFileRawData)), nil)
+	mb.bodyTag.Set("fileSize", strconv.Itoa(len(mb.picRawData)), nil)
 
 	return mb.bodyTag
 }

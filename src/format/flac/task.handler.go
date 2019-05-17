@@ -42,8 +42,16 @@ func TaskHandler_T6PICT(operation string, args interface{}) (interface{}, *types
 	switch operation {
 	case "dumpPic":
 		return TaskHandler_T6PICT_dumpPic(args)
+	case "setPic":
+		return TaskHandler_T6PICT_setPic(args)
+	case "addPic":
+		return TaskHandler_T6PICT_addPic(args)
 	case "setPicType":
 		return TaskHandler_T6PICT_setPicType(args)
+	case "setDesc":
+		return TaskHandler_T6PICT_setDesc(args)
+	case "getDesc":
+		return TaskHandler_T6PICT_getDesc(args)
 	default:
 		return nil, TaskHandler_Exception_UnsupportedTask(operation)
 	}

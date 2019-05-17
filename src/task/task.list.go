@@ -20,10 +20,16 @@ type Collection struct {
 
 var CollectionFile *string
 
-func Init() {
+func Init() *types.Exception {
 	config.NewRegister(func() {
 		CollectionFile = flag.String("task", "", "任务配置文件")
 	})
+
+	if err := GlobalHandler().Register("COMMON", Handler_COMMON); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func parseTaskItem(TaskItemRaw interface{}) (*Item, interface{}) {

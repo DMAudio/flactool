@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/spf13/viper v1.3.2
-	golang.org/x/net v0.0.0-20190514140710-3ec191127204 // indirect
+	golang.org/x/image v0.0.0-20190516052701-61b8692d9a5c
+	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a // indirect
 )

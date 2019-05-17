@@ -122,6 +122,10 @@ func (mb *MetaBlockT4VORB) DumpCommentList() ([][2]string, *types.Exception) {
 	return mb.comments.DumpList()
 }
 
+func (mb *MetaBlockT4VORB) GetType() MetaBlockType {
+	return MetaBlockType_VORBIS_COMMENT
+}
+
 func (mb *MetaBlockT4VORB) GetTags() *MetaBlockTags {
 	if mb.bodyTag == nil {
 		mb.bodyTag = NewMetaBlockTags()

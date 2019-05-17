@@ -63,7 +63,7 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 		}
 	}
 
-	fObj.SetMetaParams()
+	fObj.GenerateMetaParams()
 
 	//读取Frames
 	if FrameBytes, err := br.ReadAllFollowedBytes(); err != nil {
@@ -139,7 +139,7 @@ func (fObj *Flac) WriteToFile(path string) *types.Exception {
 	return nil
 }
 
-func (fObj *Flac) SetMetaParams() {
+func (fObj *Flac) GenerateMetaParams() {
 	for blockIndex, block := range fObj.blocks {
 		block.GetTags().Set("index", strconv.Itoa(blockIndex), nil)
 		if blockIndex == len(fObj.blocks)-1 {
@@ -156,11 +156,6 @@ func (fObj *Flac) Initialized() bool {
 
 func (fObj *Flac) GetBlocks() []*MetaBlock {
 	return fObj.blocks
-}
-
-func (fObj *Flac) SetBlocks(blocks []*MetaBlock) {
-	fObj.blocks = blocks
-	fObj.SetMetaParams()
 }
 
 func (fObj *Flac) FindBlocks(pattern string) []int {
@@ -199,6 +194,16 @@ func (fObj *Flac) GetBlockIndex(ptr *MetaBlock) int {
 		}
 	}
 	return -1
+}
+
+func (fObj *Flac) SetBlocks(blocks []*MetaBlock) {
+	fObj.blocks = blocks
+	fObj.GenerateMetaParams()
+}
+
+func (fObj *Flac) AppendBlock(block *MetaBlock){
+	fObj.blocks = append(fObj.blocks, block)
+	fObj.GenerateMetaParams()
 }
 
 var globalFlac *Flac

@@ -27,6 +27,10 @@ func (mb *MetaBlockT1PADD) Encode() (*types.Buffer, *types.Exception) {
 	return buffer, nil
 }
 
+func (mb *MetaBlockT1PADD) GetType() MetaBlockType {
+	return MetaBlockType_PADDING
+}
+
 func (mb *MetaBlockT1PADD) GetTags() *MetaBlockTags {
 	m := NewMetaBlockTags()
 
