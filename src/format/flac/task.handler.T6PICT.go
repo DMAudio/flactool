@@ -29,8 +29,10 @@ func TaskHandler_T6PICT_Each(args interface{}, processer func(*MetaBlock, *MetaB
 				MetaBlockTypeStr_PICTURE+"[:筛选条件]",
 				searchPattern,
 			)
+		} else if searchPatternProcessed, _, err := task.GlobalArgFilter().FillArgs(searchPattern, nil); err != nil {
+			return err
 		} else {
-			PatternPathPairs = append(PatternPathPairs, [2]string{searchPattern, filePath})
+			PatternPathPairs = append(PatternPathPairs, [2]string{searchPatternProcessed, filePath})
 		}
 	}
 

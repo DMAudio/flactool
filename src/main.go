@@ -39,6 +39,10 @@ func main() {
 	}
 
 	if *outputFile != "" {
-		flac.GlobalFlac().WriteToFile(*outputFile)
+		if outputFileProcessed, _, err := task.GlobalArgFilter().FillArgs(*outputFile, nil); err != nil {
+			types.Throw(err, types.RsError)
+		} else {
+			flac.GlobalFlac().WriteToFile(outputFileProcessed)
+		}
 	}
 }

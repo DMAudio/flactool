@@ -29,6 +29,10 @@ func Init() *types.Exception {
 		return err
 	}
 
+	if err := GlobalArgFilter().Register("env", Filter_Env); err != nil {
+		return err
+	}
+
 	return nil
 }
 

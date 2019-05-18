@@ -5,11 +5,6 @@ import (
 	"p20190417/types"
 )
 
-var TMFlac_CanNotRegister_FilterHandler = types.NewMask(
-	"CAN_NOT_REGISTER_TASK_HANDLER",
-	"无法注册填参执行者：{{handler}}",
-)
-
 func Init() *types.Exception {
 	if err := task.GlobalHandler().Register(TaskHandler_T4VORB_Key, TaskHandler_T4VORB); err != nil {
 		return err
@@ -24,9 +19,7 @@ func Init() *types.Exception {
 	}
 
 	if err := task.GlobalArgFilter().Register("flac", ArgFilter); err != nil {
-		return types.NewException(TMFlac_CanNotRegister_FilterHandler, map[string]string{
-			"handler": "flac",
-		}, err)
+		return err
 	}
 
 	return nil
