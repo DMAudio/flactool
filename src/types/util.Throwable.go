@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"time"
 )
 
@@ -54,7 +55,11 @@ func Throw(t Throwable, severity Severity) {
 	)
 	if severity != RsPanic {
 		fmt.Println(message)
+		if severity > RsWarning {
+			_, _ = fmt.Fprintln(os.Stderr, message)
+		}
 	} else {
 		log.Panicln(message)
 	}
+
 }
