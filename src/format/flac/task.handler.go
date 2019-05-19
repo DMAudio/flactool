@@ -23,6 +23,8 @@ func TaskHandler_T4VORB(operation string, args interface{}) (interface{}, *types
 		return TaskHandler_T4VORB_PrintTags(args)
 	case "setTags":
 		return TaskHandler_T4VORB_SetTags(args)
+	case "loadTags":
+		return TaskHandler_T4VORB_loadTags(args)
 	case "dumpTags":
 		return TaskHandler_T4VORB_dumpTags(args)
 	case "importTags":

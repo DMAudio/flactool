@@ -103,7 +103,12 @@ func (mb *MetaBlockT4VORB) SetRefer(referText string) {
 	mb.refer = referText
 }
 
-func (mb *MetaBlockT4VORB) SetComment(Key string, Value string, actionIfNotExist types.SSListedMapAction) *types.Exception {
+func (mb *MetaBlockT4VORB) SetCommentMap(comments *types.SSListedMap) {
+	mb.comments = comments
+	mb.clearTagCache()
+}
+
+func (mb *MetaBlockT4VORB) SetComments(Key string, Value string, actionIfNotExist types.SSListedMapAction) *types.Exception {
 	defer mb.clearTagCache()
 	return mb.comments.Set(Key, Value, actionIfNotExist)
 }
