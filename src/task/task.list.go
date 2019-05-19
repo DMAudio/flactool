@@ -33,6 +33,10 @@ func Init() *types.Exception {
 		return err
 	}
 
+	if err := GlobalArgFilter().Register("fmtFName", Filter_FmtFileName); err != nil {
+		return err
+	}
+
 	return nil
 }
 

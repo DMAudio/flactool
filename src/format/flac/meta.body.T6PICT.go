@@ -13,6 +13,7 @@ import (
 	"p20190417/types"
 	"p20190417/utils"
 	"strconv"
+	"strings"
 )
 
 type MetaBlockT6PICT struct {
@@ -285,6 +286,10 @@ func (mb *MetaBlockT6PICT) GetTags() *MetaBlockTags {
 	mb.bodyTag.Set("colorDepth", strconv.FormatUint(uint64(mb.picColorDepth), 10), nil)
 	mb.bodyTag.Set("colorAmount", strconv.FormatUint(uint64(mb.picColorAmount), 10), nil)
 	mb.bodyTag.Set("fileSize", strconv.Itoa(len(mb.picRawData)), nil)
+
+	if ext, err := mime.ExtensionsByType(mb.picMime); err == nil && len(ext) > 0 {
+		mb.bodyTag.Set("fileExt", strings.TrimPrefix(ext[0], "."), nil)
+	}
 
 	return mb.bodyTag
 }
