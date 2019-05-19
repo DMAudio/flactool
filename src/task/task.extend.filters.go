@@ -10,14 +10,14 @@ import (
 )
 
 type ArgFilter struct {
-	filters   map[string]func(string, map[string]interface{}) (string, *types.Exception)
+	filters map[string]func(string, map[string]interface{}) (string, *types.Exception)
 	argRegexp *regexp.Regexp
 }
 
 func NewArgFilter() *ArgFilter {
 	argRegexp, _ := regexp.Compile("{@([a-zA-Z0-9]+):([^{}]*)}")
 	return &ArgFilter{
-		filters:   map[string]func(string, map[string]interface{}) (string, *types.Exception){},
+		filters: map[string]func(string, map[string]interface{}) (string, *types.Exception){},
 		argRegexp: argRegexp,
 	}
 }
@@ -53,8 +53,8 @@ func (af *ArgFilter) FillArgs(raw string, extraArgsCollection map[string]map[str
 		argRaw, argFilterHandler, argFilterArgs := argRawSlice[0], argRawSlice[1], argRawSlice[2]
 
 		var extraArgs map[string]interface{} = nil
-		if extraArgsCollection != nil{
-			if extraArgsTmp, exist := extraArgsCollection[argFilterHandler];exist{
+		if extraArgsCollection != nil {
+			if extraArgsTmp, exist := extraArgsCollection[argFilterHandler]; exist {
 				extraArgs = extraArgsTmp
 			}
 		}
@@ -67,10 +67,17 @@ func (af *ArgFilter) FillArgs(raw string, extraArgsCollection map[string]map[str
 	}
 
 	if len(exceptions) != 0 {
-		return raw, 0, types.NewException(TMFilter_FailedToFill_Args, nil, exceptions)
+		return raw, len(argList) - len(exceptions), types.NewException(TMFilter_FailedToFill_Args, nil, exceptions)
 	}
 
-	return raw, 0, nil
+	if argList := af.argRegexp.FindAllStringSubmatch(raw, -1); len(argList) == 0 {
+		return raw, len(argList), nil
+	} else if rawProcessed, agrAmount, err := af.FillArgs(raw, extraArgsCollection); err != nil {
+		return rawProcessed, len(argList) + agrAmount, err
+	} else {
+		return rawProcessed, len(argList) + agrAmount, nil
+	}
+
 }
 
 func (af *ArgFilter) ParseArg(filterName string, args string, extraArgs map[string]interface{}) (string, *types.Exception) {
