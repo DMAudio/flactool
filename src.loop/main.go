@@ -16,9 +16,13 @@ import (
 
 var startTime = strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10)
 
-func FileWriteString(path string, str string) error {
-	if absPath, err := filepath.Abs(strings.TrimSpace(path)); err != nil {
+func FileWriteString(fPath string, str string) error {
+	if absPath, err := filepath.Abs(strings.TrimSpace(fPath)); err != nil {
 		return fmt.Errorf("无法解析文件绝对路径")
+	} else if _, err := os.Stat(path.Dir(fPath)); os.IsNotExist(err) {
+		if err := os.MkdirAll(path.Dir(fPath), 0644); err != nil && !os.IsExist(err) {
+			panic(fmt.Errorf("无法创建日志目录：%s", path.Dir(fPath)))
+		}
 	} else if file, err := os.Create(absPath); err != nil {
 		return fmt.Errorf("无法创建文件")
 	} else {
@@ -76,11 +80,6 @@ func main() {
 		panic("无法解析日志文件夹的绝对路径")
 	} else {
 		*logDir = absPath
-		if _, err := os.Stat(*logDir); os.IsNotExist(err) {
-			if err := os.MkdirAll(*logDir, 0644); err != nil && !os.IsExist(err) {
-				panic(fmt.Errorf("无法创建日志目录：%s", *logDir))
-			}
-		}
 	}
 
 	if exe == nil || *exe == "" {
