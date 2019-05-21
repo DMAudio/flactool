@@ -12,8 +12,8 @@ var inputFile *string
 var outputFile *string
 
 func InitMain() {
-	inputFile = flag.String("input", "", "")
-	outputFile = flag.String("output", "", "")
+	inputFile = flag.String("input", "", "path to the source file")
+	outputFile = flag.String("output", "", "path which task result shall be saved to")
 }
 
 func main() {

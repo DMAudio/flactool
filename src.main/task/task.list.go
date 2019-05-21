@@ -22,7 +22,7 @@ var CollectionFile *string
 
 func Init() *types.Exception {
 	config.NewRegister(func() {
-		CollectionFile = flag.String("task", "", "任务配置文件")
+		CollectionFile = flag.String("task", "", "path to the task list file")
 	})
 
 	if err := GlobalHandler().Register("COMMON", Handler_COMMON); err != nil {

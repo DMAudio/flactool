@@ -26,7 +26,7 @@ type Throwable interface {
 var ThrowableTraceLevel *uint
 
 func InitThrowableExt() {
-	ThrowableTraceLevel = flag.Uint("trace", 48, "")
+	ThrowableTraceLevel = flag.Uint("trace", 48, "over which debug level shall stack tracing be enabled")
 }
 
 func severity2Str(s Severity) string {
