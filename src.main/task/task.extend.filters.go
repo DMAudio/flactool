@@ -1,9 +1,9 @@
 package task
 
 import (
+	"dadp.flactool/task/cgoFilters"
 	"dadp.flactool/types"
-	"fmt"
-	"regexp"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -11,46 +11,30 @@ import (
 
 type ArgFilter struct {
 	filters map[string]func(string, map[string]interface{}) (string, *types.Exception)
-	argRegexp *regexp.Regexp
 }
 
 func NewArgFilter() *ArgFilter {
-	argRegexp, _ := regexp.Compile("{@([a-zA-Z0-9]+):([^{}]*)}")
 	return &ArgFilter{
 		filters: map[string]func(string, map[string]interface{}) (string, *types.Exception){},
-		argRegexp: argRegexp,
 	}
 }
 
 func (af *ArgFilter) FillArgs(raw string, extraArgsCollection map[string]map[string]interface{}) (string, int, *types.Exception) {
-	argList := af.argRegexp.FindAllStringSubmatch(raw, -1)
-	if !(argList != nil && len(argList) > 0) {
+	argList := cgoFilters.GetArgs(raw)
+	if argList == nil || argList.Size() == 0 {
 		return raw, 0, nil
-	}
-	for _, arg := range argList {
-		if len(arg) == 0 {
-			continue
-		}
-		if len(arg) != 3 {
-			return raw, 0, types.NewException(TMFilter_UnableToParse_Arg, map[string]string{
-				"reason": "参数 %s 格式不完整",
-			}, nil)
-		}
-		if arg[1] = strings.TrimSpace(arg[1]); arg[1] == "" {
-			return raw, 0, types.NewException(TMFilter_UnableToParse_Arg, map[string]string{
-				"reason": fmt.Sprintf("参数 %s 格式不完整: 处理者不能为空", arg[0]),
-			}, nil)
-		}
-		if arg[2] = strings.TrimSpace(arg[2]); arg[2] == "" {
-			return raw, 0, types.NewException(TMFilter_UnableToParse_Arg, map[string]string{
-				"reason": fmt.Sprintf("参数 %s 格式不完整: 参数不能为空", arg[0]),
-			}, nil)
-		}
+	} else if argList.Size() > int64(math.MaxInt32) {
+		return raw, 0, types.NewException(TMFilter_UnableToParse_Arg, map[string]string{
+			"reason": "参数过多",
+		}, nil)
 	}
 
+	argListSize := int(argList.Size())
+
 	exceptions := map[string]*types.Exception{}
-	for argIndex, argRawSlice := range argList {
-		argRaw, argFilterHandler, argFilterArgs := argRawSlice[0], argRawSlice[1], argRawSlice[2]
+	for argIndex := 0; argIndex <= argListSize-1; argIndex++ {
+		argRawItem := argList.Get(argIndex)
+		argRaw, argFilterHandler, argFilterArgs := argRawItem.Get(0), argRawItem.Get(1), argRawItem.Get(2)
 
 		var extraArgs map[string]interface{} = nil
 		if extraArgsCollection != nil {
@@ -67,17 +51,16 @@ func (af *ArgFilter) FillArgs(raw string, extraArgsCollection map[string]map[str
 	}
 
 	if len(exceptions) != 0 {
-		return raw, len(argList) - len(exceptions), types.NewException(TMFilter_FailedToFill_Args, nil, exceptions)
+		return raw, argListSize - len(exceptions), types.NewException(TMFilter_FailedToFill_Args, nil, exceptions)
 	}
 
-	if argList := af.argRegexp.FindAllStringSubmatch(raw, -1); len(argList) == 0 {
-		return raw, len(argList), nil
+	if argList := cgoFilters.GetArgs(raw); argList.Size() == 0 {
+		return raw, argListSize, nil
 	} else if rawProcessed, agrAmount, err := af.FillArgs(raw, extraArgsCollection); err != nil {
-		return rawProcessed, len(argList) + agrAmount, err
+		return rawProcessed, argListSize + agrAmount, err
 	} else {
-		return rawProcessed, len(argList) + agrAmount, nil
+		return rawProcessed, argListSize + agrAmount, nil
 	}
-
 }
 
 func (af *ArgFilter) ParseArg(filterName string, args string, extraArgs map[string]interface{}) (string, *types.Exception) {
