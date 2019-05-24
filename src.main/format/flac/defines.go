@@ -319,6 +319,11 @@ var TMFlac_CanNotWrite_Frames = types.NewMask(
 	"无法写入源数据",
 )
 
+var TMFlac_FailedTo_Parse_FilterPattern = types.NewMask(
+	"FailedTo_Parse_FilterPattern",
+	"无法解析过滤表达式:\n表达式：{{pattern}}",
+)
+
 var TMFlac_Arg_CanNotFind_Block = types.NewMask(
 	"CAN_NOT_FIND_BLOCK",
 	"找不到数据块: {{pattern}}",

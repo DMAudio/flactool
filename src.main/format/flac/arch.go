@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"dadp.flactool/types"
 	"dadp.flactool/utils"
+	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -158,16 +160,54 @@ func (fObj *Flac) GetBlocks() []*MetaBlock {
 	return fObj.blocks
 }
 
-func (fObj *Flac) FindBlocks(pattern string) []int {
+func (fObj *Flac) FindBlocks(pattern string) ([]int, *types.Exception) {
+	patternTrimmed := strings.TrimSpace(pattern)
+	if patternTrimmed == "" {
+		return nil, types.NewException(
+			TMFlac_FailedTo_Parse_FilterPattern,
+			map[string]string{"pattern": pattern},
+			types.Mismatched_Format_Exception(
+				"BlockType or BlockType:TagName1=Filter1[&TagName2=Filter2...]",
+				"(Empty)",
+			),
+		)
+	}
+
+	var blockType string
+	var blockFilters url.Values = nil
+
+	patternSplit := strings.SplitN(patternTrimmed, ":", 2)
+	blockType = strings.TrimSpace(patternSplit[0])
+	if len(patternSplit) == 2 {
+		if blockFiltersTemp, err := url.ParseQuery(strings.TrimSpace(patternSplit[1])); err != nil {
+			return nil, types.NewException(
+				TMFlac_FailedTo_Parse_FilterPattern,
+				map[string]string{"pattern": pattern},
+				err,
+			)
+		} else if len(blockFiltersTemp) == 0 {
+			return nil, types.NewException(
+				TMFlac_FailedTo_Parse_FilterPattern,
+				map[string]string{"pattern": pattern},
+				types.Mismatched_Format_Exception(
+					"BlockType or BlockType:TagName1=Filter1[&TagName2=Filter2...]",
+					"BlockType:(Empty)",
+				),
+			)
+		} else {
+			blockFilters = blockFiltersTemp
+		}
+	}
+
 	result := make([]int, 0)
 
 	for blockIndex, block := range fObj.blocks {
-		if block.MatchesPattern(pattern) {
+		if block.Matches(blockType, blockFilters) {
 			result = append(result, blockIndex)
 		}
 	}
 
-	return result
+	return result, nil
 }
 
 func (fObj *Flac) GetBlockByIndex(index int) *MetaBlock {
@@ -179,6 +219,9 @@ func (fObj *Flac) GetBlockByIndex(index int) *MetaBlock {
 
 func (fObj *Flac) GetBlocksByIndexSlice(indexes []int) []*MetaBlock {
 	blocks := make([]*MetaBlock, 0)
+	if len(indexes) == 0 {
+		return blocks
+	}
 	for _, index := range indexes {
 		if index >= 0 && index < len(fObj.blocks) {
 			blocks = append(blocks, fObj.blocks[index])

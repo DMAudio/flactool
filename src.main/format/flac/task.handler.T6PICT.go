@@ -38,7 +38,12 @@ func TaskHandler_T6PICT_Each(args interface{}, processer func(*MetaBlock, *MetaB
 
 	for _, pair := range PatternPathPairs {
 		pattern, pArgs := pair[0], pair[1]
-		for _, blockIndex := range globalFlac.FindBlocks(pattern) {
+		var blockIndexSlice []int
+		blockIndexSlice, err = globalFlac.FindBlocks(pattern)
+		if err != nil {
+			return err
+		}
+		for _, blockIndex := range blockIndexSlice {
 			block := globalFlac.GetBlockByIndex(blockIndex)
 			if blockBody, ok := block.GetBody().(*MetaBlockT6PICT); !ok {
 				return types.NewException(TMFlac_CanNotAssert_METABLOCKAsSpecificType, map[string]string{
@@ -129,7 +134,12 @@ func TaskHandler_T6PICT_getDesc(args interface{}) (interface{}, *types.Exception
 			return nil, err
 		} else {
 			results := make([]string, 0)
-			for _, blockIndex := range globalFlac.FindBlocks(pattern) {
+			var blockIndexSlice []int
+			blockIndexSlice, err = globalFlac.FindBlocks(pattern)
+			if err != nil {
+				return nil, err
+			}
+			for _, blockIndex := range blockIndexSlice {
 				block := globalFlac.GetBlockByIndex(blockIndex)
 				if blockBody, ok := block.GetBody().(*MetaBlockT6PICT); !ok {
 					return nil, types.NewException(TMFlac_CanNotAssert_METABLOCKAsSpecificType, map[string]string{

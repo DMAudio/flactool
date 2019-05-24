@@ -35,7 +35,9 @@ func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exceptio
 		if pattern == "..." {
 			preserveUnMatchedBlocks = len(blockMatched) - 1
 		}
-		if blockIndexes := globalFlac.FindBlocks(pattern); blockIndexes != nil && len(blockIndexes) != 0 {
+		if blockIndexes, err := globalFlac.FindBlocks(pattern); err != nil {
+			return nil, err
+		} else if blockIndexes != nil && len(blockIndexes) != 0 {
 			for _, blockIndex := range blockIndexes {
 				if types.IListFindElement(blockMatched, blockIndex) > -1 {
 					continue
@@ -81,7 +83,9 @@ func TaskHandler_MAIN_DeleteBlocks(args interface{}) (interface{}, *types.Except
 	}
 	for _, pattern := range searchPatterns {
 		pattern = strings.TrimSpace(pattern)
-		if blockIndexes := globalFlac.FindBlocks(pattern); blockIndexes != nil && len(blockIndexes) != 0 {
+		if blockIndexes, err := globalFlac.FindBlocks(pattern); err != nil {
+			return nil, err
+		} else if blockIndexes != nil && len(blockIndexes) != 0 {
 			for _, blockIndex := range blockIndexes {
 				blockUnMatched = types.IListDeleteByElement(blockUnMatched, blockIndex)
 			}

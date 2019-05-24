@@ -45,11 +45,15 @@ func ArgFilter(input string, extraArgs map[string]interface{}) (string, *types.E
 		}
 	} else {
 		var globalFlac *Flac
+		var blocks []*MetaBlock
+
 		if globalFlac, err = GlobalFlacInit(); err != nil {
 			return "", err
+		} else if blockIndexSlice, err := globalFlac.FindBlocks(blockFilter); err != nil {
+			return "", err
+		} else {
+			blocks = globalFlac.GetBlocksByIndexSlice(blockIndexSlice)
 		}
-
-		blocks := globalFlac.GetBlocksByIndexSlice(globalFlac.FindBlocks(blockFilter))
 
 		if len(blocks) == 0 {
 			return "", types.NewException(TMFlac_Arg_CanNotFind_Block, map[string]string{

@@ -5,7 +5,6 @@ import (
 	"dadp.flactool/types"
 	"fmt"
 	"net/url"
-	"strings"
 )
 
 type MetaBlockType uint8
@@ -197,27 +196,16 @@ func (m *MetaBlock) GetTags() *MetaBlockTags {
 	return m.blockTags
 }
 
-func (m *MetaBlock) MatchesPattern(patternRaw string) bool {
-	patternSplit := strings.SplitN(patternRaw, ":", 2)
-
-	if blockType := patternSplit[0]; blockType != m.GetType().String() {
+func (m *MetaBlock) Matches(blockType string, blockFilters url.Values) bool {
+	if blockType != "BLOCK" && blockType != m.GetType().String() {
 		return false
 	}
 
-	var filters map[string][]string
-	if len(patternSplit) == 2 {
-		if filtersTmp, err := url.ParseQuery(patternSplit[1]); err != nil {
-			panic(err)
-		} else {
-			filters = filtersTmp
-		}
-	}
-
-	if len(filters) == 0 {
+	if blockFilters == nil || len(blockFilters) == 0 {
 		return true
 	}
 
-	for key, values := range filters {
+	for key, values := range blockFilters {
 		if !m.GetTags().Match(key, values) {
 			return false
 		}
