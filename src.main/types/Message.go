@@ -28,9 +28,3 @@ func WrappedMessage(contentPrefix string, content string, withWarpper bool) stri
 	}
 	return strings.TrimSpace(result.String())
 }
-
-type ThrowableString string
-
-func (m ThrowableString) GetMessage(bool) string {
-	return string(m)
-}

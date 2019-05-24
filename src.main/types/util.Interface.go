@@ -7,16 +7,6 @@ import (
 	"strings"
 )
 
-func Mismatched_Format_Exception(expected string, got string) *Exception {
-	return NewException(NewMask(
-		"Mismatched_FORMAT_ERROR",
-		"格式错误：预期：{{expected}}，实际：{{got}}",
-	), map[string]string{
-		"expected": expected,
-		"got":      got,
-	}, nil)
-}
-
 func SliceItem_Parsed_Failed(position int, cause *Exception) *Exception {
 	return NewException(NewMask(
 		"SLICE_ITEM_PARSED_FAILED",
@@ -47,8 +37,8 @@ func MapItem_Parsed_Failed(key string, cause *Exception) *Exception {
 func InterfaceToStringSlice(input interface{}) ([]string, *Exception) {
 	result := make([]string, 0)
 
-	if input == nil{
-		return result,nil
+	if input == nil {
+		return result, nil
 	}
 
 	switch input.(type) {
@@ -79,7 +69,7 @@ func InterfaceToStringSlice(input interface{}) ([]string, *Exception) {
 				if inputParsed, ok := inputRaw.(string); !ok {
 					return nil, SliceItem_Parsed_Failed(
 						inputIndex,
-						Mismatched_Format_Exception("string", reflect.TypeOf(inputRaw).String()),
+						Mismatched_Format_Exception("Type:string", reflect.TypeOf(inputRaw).String()),
 					)
 				} else {
 					result = append(result, inputParsed)
@@ -88,7 +78,11 @@ func InterfaceToStringSlice(input interface{}) ([]string, *Exception) {
 		}
 		return result, nil
 	default:
-		return nil, Mismatched_Format_Exception("Kind:Slice or String", reflect.TypeOf(input).String())
+		return nil, Mismatched_Format_Exception(
+			"Kind:Slice or Type:string",
+			"Kind:"+reflect.TypeOf(input).Kind().String()+", "+
+				"Type:"+reflect.TypeOf(input).String(),
+		)
 	}
 
 }
@@ -110,7 +104,7 @@ func InterfaceToStringMap(input interface{}) (map[string]string, *Exception) {
 				keyParsed = strconv.FormatInt(int64(keyRaw.(int)), 10)
 			default:
 				return nil, MapKey_Parsed_Failed(keyRaw,
-					Mismatched_Format_Exception("string / int", reflect.TypeOf(keyRaw).String()),
+					Mismatched_Format_Exception("Type:string or Type:int", "Type:"+reflect.TypeOf(keyRaw).String()),
 				)
 			}
 
@@ -125,7 +119,7 @@ func InterfaceToStringMap(input interface{}) (map[string]string, *Exception) {
 				valueParsed = strconv.FormatInt(int64(valueRaw.(int)), 10)
 			default:
 				return nil, MapItem_Parsed_Failed(keyParsed,
-					Mismatched_Format_Exception("string / int", reflect.TypeOf(valueRaw).String()),
+					Mismatched_Format_Exception("Type:string or Type:int", "Type:"+reflect.TypeOf(valueRaw).String()),
 				)
 			}
 			result[keyParsed] = valueParsed

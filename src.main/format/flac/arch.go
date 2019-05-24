@@ -28,7 +28,7 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 		return types.NewException(TMFlac_CanNotRead_FileSignature, nil, err)
 	}
 
-	//解析前置ID3V2
+	//Parse Prepend ID3V2
 	if bytes.Equal(marker[:3], id3Signature) {
 		blockPreId3 := PrependID3v2{}
 		if err := blockPreId3.Parse(br); err != nil {
@@ -42,7 +42,7 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 		}
 	}
 
-	//检测fLaC标头
+	//Verify "fLaC" signature
 	if !bytes.Equal(marker, flacSignature) {
 		return types.NewException(TMFlac_Incorrect_FileSignature, map[string]string{
 			"expected": string(flacSignature),
@@ -50,7 +50,7 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 		}, nil)
 	}
 
-	//解析Meta数据块
+	//Parse MetaBlocks
 	for {
 		blockMeta := &MetaBlock{}
 		if isLast, err := blockMeta.Parse(br); err != nil {
@@ -65,9 +65,9 @@ func (fObj *Flac) Parse(br *types.BinaryReader) *types.Exception {
 		}
 	}
 
-	fObj.GenerateMetaParams()
+	fObj.ResetMetaBlockProperties()
 
-	//读取Frames
+	//Read Frames
 	if FrameBytes, err := br.ReadAllFollowedBytes(); err != nil {
 		types.NewException(TMFlac_CanNotRead_Frames, nil, nil)
 	} else {
@@ -102,14 +102,17 @@ func (fObj *Flac) Encode() (*types.Buffer, *types.Exception) {
 
 	for bIndex, block := range fObj.blocks {
 		if dataBuffer, err := block.Encode(bIndex == len(fObj.blocks)-1); err != nil {
+			//Encode block
 			return nil, types.NewException(TMFlac_CanNotEncode_MetaDataBlock, map[string]string{
 				"n": strconv.Itoa(bIndex),
 			}, err)
 		} else if dataDumped, err := dataBuffer.Dump(); err != nil {
+			//Dump bytes
 			return nil, types.NewException(TMFlac_CanNotDump_MetaDataBlock, map[string]string{
 				"n": strconv.Itoa(bIndex),
 			}, err)
 		} else if wroteLen, err := buffer.Write(dataDumped); err != nil || wroteLen != len(dataDumped) {
+			//Write to buffer
 			return nil, types.NewException(TMFlac_CanNotWrite_MetaDataBlock, map[string]string{
 				"n": strconv.Itoa(bIndex),
 			}, err)
@@ -141,7 +144,7 @@ func (fObj *Flac) WriteToFile(path string) *types.Exception {
 	return nil
 }
 
-func (fObj *Flac) GenerateMetaParams() {
+func (fObj *Flac) ResetMetaBlockProperties() {
 	for blockIndex, block := range fObj.blocks {
 		block.GetTags().Set("index", strconv.Itoa(blockIndex), nil)
 		if blockIndex == len(fObj.blocks)-1 {
@@ -230,23 +233,14 @@ func (fObj *Flac) GetBlocksByIndexSlice(indexes []int) []*MetaBlock {
 	return blocks
 }
 
-func (fObj *Flac) GetBlockIndex(ptr *MetaBlock) int {
-	for blockIndex, blockPtr := range fObj.blocks {
-		if blockPtr == ptr {
-			return blockIndex
-		}
-	}
-	return -1
-}
-
 func (fObj *Flac) SetBlocks(blocks []*MetaBlock) {
 	fObj.blocks = blocks
-	fObj.GenerateMetaParams()
+	fObj.ResetMetaBlockProperties()
 }
 
 func (fObj *Flac) AppendBlock(block *MetaBlock) {
 	fObj.blocks = append(fObj.blocks, block)
-	fObj.GenerateMetaParams()
+	fObj.ResetMetaBlockProperties()
 }
 
 var globalFlac *Flac

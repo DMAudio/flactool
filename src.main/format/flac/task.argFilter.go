@@ -8,22 +8,13 @@ import (
 func SplitFilterArg(argRaw string) (string, string, *types.Exception) {
 	argSplit := strings.SplitN(argRaw, "->", 2)
 	if len(argSplit) != 2 {
-		return "", "", types.Mismatched_Format_Exception(
-			"筛选条件 -> 操作参数",
-			argRaw,
-		)
-	} else if searchPattern := strings.TrimSpace(argSplit[0]); searchPattern == "" {
-		return "", "", types.Mismatched_Format_Exception(
-			":筛选条件",
-			searchPattern,
-		)
+		return "", "", types.Mismatched_Format_Exception("FilterPattern -> OperationArg", argRaw)
+	} else if filterPattern := strings.TrimSpace(argSplit[0]); filterPattern == "" {
+		return "", "", types.Mismatched_Format_Exception("FilterPattern", "(Empty)")
 	} else if operationArg := strings.TrimSpace(argSplit[1]); operationArg == "" {
-		return "", "", types.Mismatched_Format_Exception(
-			"操作参数",
-			"(空)",
-		)
+		return "", "", types.Mismatched_Format_Exception("OperationArg", "(Empty)")
 	} else {
-		return searchPattern, operationArg, nil
+		return filterPattern, operationArg, nil
 	}
 }
 

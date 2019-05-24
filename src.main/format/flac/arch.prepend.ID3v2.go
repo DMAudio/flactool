@@ -9,7 +9,6 @@ type PrependID3v2 struct {
 }
 
 func (pID3 *PrependID3v2) Parse(br *types.BinaryReader) *types.Exception {
-	//TODO: 替换成没有输出的跳过函数
 	if _, err := br.ReadBytes(2); err != nil {
 		return types.NewException(TMFlac_CanNotParse_ID3V2BlockSIZE, nil, err)
 	}

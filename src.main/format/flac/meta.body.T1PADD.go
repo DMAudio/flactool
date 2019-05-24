@@ -34,7 +34,7 @@ func (mb *MetaBlockT1PADD) GetType() MetaBlockType {
 func (mb *MetaBlockT1PADD) GetTags() *MetaBlockTags {
 	m := NewMetaBlockTags()
 
-	m.Set("BodyLength", strconv.Itoa(len(mb.data)), nil)
+	m.Set("bodyLength", strconv.Itoa(len(mb.data)), nil)
 
 	return m
 }

@@ -22,38 +22,14 @@ func NewMetaBlockTags() *MetaBlockTags {
 	return m
 }
 
-func (tags *MetaBlockTags) getChild(fullTag string) (*MetaBlockTags, string) {
-	for childName, childNode := range tags.children {
-		if strings.HasPrefix(fullTag, childName+".") {
-			return childNode.getChild(strings.TrimPrefix(fullTag, childName+"."))
-		}
-	}
-	return tags, fullTag
-}
-
 func (tags *MetaBlockTags) Get(tag string) string {
 	tcNode, tcName := tags.getChild(tag)
 	return tcNode.get(tcName)
 }
 
-func (tags *MetaBlockTags) get(tag string) string {
-	return tags.data.Get(tag)
-}
-
 func (tags *MetaBlockTags) Set(tag string, data string, matcher func(rawData string, pattern []string) bool) {
 	tcNode, tcName := tags.getChild(tag)
 	tcNode.set(tcName, data, matcher)
-}
-
-func (tags *MetaBlockTags) set(tag string, data string, matcher func(rawData string, pattern []string) bool) {
-	tags.data.Set(tag, data)
-	if !tags.data.Has(tag) {
-		return
-	}
-
-	if matcher != nil {
-		tags.matchers[tag] = matcher
-	}
 }
 
 func (tags *MetaBlockTags) SetChild(prefix string, childNode *MetaBlockTags) {
@@ -68,13 +44,37 @@ func (tags *MetaBlockTags) SetChild(prefix string, childNode *MetaBlockTags) {
 	}
 }
 
-func (tags *MetaBlockTags) setChild(prefix string, childNode *MetaBlockTags) {
-	tags.children[prefix] = childNode
-}
-
 func (tags *MetaBlockTags) Match(tag string, pattern []string) bool {
 	tcNode, tcName := tags.getChild(tag)
 	return tcNode.match(tcName, pattern)
+}
+
+func (tags *MetaBlockTags) getChild(fullTag string) (*MetaBlockTags, string) {
+	for childName, childNode := range tags.children {
+		if strings.HasPrefix(fullTag, childName+".") {
+			return childNode.getChild(strings.TrimPrefix(fullTag, childName+"."))
+		}
+	}
+	return tags, fullTag
+}
+
+func (tags *MetaBlockTags) get(tag string) string {
+	return tags.data.Get(tag)
+}
+
+func (tags *MetaBlockTags) set(tag string, data string, matcher func(rawData string, pattern []string) bool) {
+	tags.data.Set(tag, data)
+	if !tags.data.Has(tag) {
+		return
+	}
+
+	if matcher != nil {
+		tags.matchers[tag] = matcher
+	}
+}
+
+func (tags *MetaBlockTags) setChild(prefix string, childNode *MetaBlockTags) {
+	tags.children[prefix] = childNode
 }
 
 func (tags *MetaBlockTags) match(tag string, pattern []string) bool {

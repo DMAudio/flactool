@@ -22,7 +22,7 @@ func ParseConfig(cfgPath string) (map[string]interface{}, error) {
 	switch strings.ToLower(file_type) {
 	case "json", "yaml":
 	default:
-		return nil, fmt.Errorf("配置文件后缀不受支持，请确保使用json或yaml文件")
+		return nil, fmt.Errorf("unsupported file extension")
 	}
 
 	cfg := viper.New()

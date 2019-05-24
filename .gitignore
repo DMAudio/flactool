@@ -28,3 +28,4 @@ _testmain.go
 bin/
 test/
 test.cgo/
+\.vscode/

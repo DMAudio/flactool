@@ -74,29 +74,29 @@ func NewMetaBlock(body MetaBlockBody) *MetaBlock {
 }
 
 func (m *MetaBlock) Parse(br *types.BinaryReader) (bool, *types.Exception) {
-	var blockHead uint64
+	var blockHeader uint64
 	var blockSize uint64
 
-	//头部
+	//METADATA_BLOCK_HEADER
 	if blockHeadData, err := br.ReadBytes(1); err != nil {
 		return true, types.NewException(TMFlac_CanNotParse_MetaBlockHead, nil, err)
 	} else {
-		blockHead = types.BytesToUInt64(blockHeadData)
+		blockHeader = types.BytesToUInt64(blockHeadData)
 	}
 
-	//1bit 是否为最后一个数据块
-	isLastFlag := blockHead>>7 == 1
-	//7bit 数据块类型
-	m.blockType = MetaBlockType(uint8(blockHead & 0x7F))
+	// + 1 bit
+	isLastFlag := blockHeader>>7 == 1
+	// + 7 bit
+	m.blockType = MetaBlockType(uint8(blockHeader & 0x7F))
 
-	//数据长度 3byte
+	// + 3 byte
 	if blockSizeData, err := br.ReadBytes(3); err != nil {
 		return isLastFlag, types.NewException(TMFlac_CanNotParse_MetaBlockSIZE, nil, err)
 	} else {
 		blockSize = types.BytesToUInt64(blockSizeData)
 	}
 
-	//原始数据
+	//METADATA_BLOCK_DATA
 	if blockData, err := br.ReadBytes(blockSize); err != nil {
 		return isLastFlag, types.NewException(TMFlac_CanNotRead_MetaBlockData, nil, err)
 	} else {
@@ -130,7 +130,6 @@ func (m *MetaBlock) ParseBody(data []byte) (MetaBlockBody, *types.Exception) {
 		body = &MetaBlockT6PICT{}
 	default:
 		body = &MetaBlockT1PADD{}
-
 	}
 
 	err := body.Parse(types.NewBinaryReader(r))
@@ -168,9 +167,6 @@ func (m *MetaBlock) Encode(isLast bool) (*types.Buffer, *types.Exception) {
 	} else if _, err := buffer.Write(blockBodySizeBytes); err != nil {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaBlockBodySize, nil, err)
 	}
-
-	//dump, err := buffer.DumpList()
-	//fmt.Printf("%08b\t%v", dump, err)
 
 	if _, err := buffer.Write(bodyData); err != nil {
 		return nil, types.NewException(TMFlac_CanNotWrite_MetaBlockBodySize, nil, err)

@@ -25,10 +25,7 @@ func TaskHandler_T6PICT_Each(args interface{}, processer func(*MetaBlock, *MetaB
 		if searchPattern, filePath, err := SplitFilterArg(argRaw); err != nil {
 			return err
 		} else if !strings.HasPrefix(searchPattern, MetaBlockTypeStr_PICTURE) {
-			return types.Mismatched_Format_Exception(
-				MetaBlockTypeStr_PICTURE+"[:筛选条件]",
-				searchPattern,
-			)
+			return types.Mismatched_Format_Exception(MetaBlockTypeStr_PICTURE+"[:FilterPattern]", searchPattern)
 		} else if searchPatternProcessed, _, err := task.GlobalArgFilter().FillArgs(searchPattern, nil); err != nil {
 			return err
 		} else {

@@ -61,9 +61,7 @@ func TaskHandler_T4VORB_SetRefer(args interface{}) (interface{}, *types.Exceptio
 	} else if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
 	} else if newRefer, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("string",
-			reflect.TypeOf(args).String(),
-		)
+		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if newReferProcessed, _, err := task.GlobalArgFilter().FillArgs(newRefer, nil); err != nil {
 		return nil, err
 	} else {
@@ -119,9 +117,7 @@ func TaskHandler_T4VORB_dumpTags(args interface{}) (interface{}, *types.Exceptio
 	if args == nil {
 		return nil, nil
 	} else if tagListPath, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("string",
-			reflect.TypeOf(args).String(),
-		)
+		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, nil); err != nil {
 		return nil, err
 	} else if tagListContent, err := TaskHandler_T4VORB_PrintTags(nil); err != nil {
@@ -137,9 +133,7 @@ func TaskHandler_T4VORB_importTags(args interface{}) (interface{}, *types.Except
 	if args == nil {
 		return nil, nil
 	} else if tagListPath, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("string",
-			reflect.TypeOf(args).String(),
-		)
+		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, nil); err != nil {
 		return nil, err
 	} else if fileContent, err := utils.FileReadBytes(tagListPathParsed); err != nil {
@@ -161,9 +155,7 @@ func TaskHandler_T4VORB_loadTags(args interface{}) (interface{}, *types.Exceptio
 	} else if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
 	} else if tagListPath, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("string",
-			reflect.TypeOf(args).String(),
-		)
+		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, nil); err != nil {
 		return nil, err
 	} else if fileContent, err := utils.FileReadBytes(tagListPathParsed); err != nil {

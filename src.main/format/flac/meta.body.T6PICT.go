@@ -29,14 +29,14 @@ type MetaBlockT6PICT struct {
 }
 
 func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
-	//图片类型
+	//Picture type according to the ID3v2 APIC frame
 	if TypeData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6Type, nil, err)
 	} else {
 		mb.picType = binary.BigEndian.Uint32(TypeData)
 	}
 
-	//MIME信息
+	//MIME type string
 	if MIMETypeLengthData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6MIMELength, nil, err)
 	} else {
@@ -48,7 +48,7 @@ func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
 		}
 	}
 
-	//图片介绍
+	//Description (in UTF-8)
 	if DescLengthData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6DescriptionLength, nil, err)
 	} else {
@@ -60,35 +60,35 @@ func (mb *MetaBlockT6PICT) Parse(r *types.BinaryReader) *types.Exception {
 		}
 	}
 
-	//宽度
+	//Width
 	if WidthData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6Width, nil, err)
 	} else {
 		mb.picWidth = binary.BigEndian.Uint32(WidthData)
 	}
 
-	//长度
+	//Height
 	if HeightData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6Height, nil, err)
 	} else {
 		mb.picHeight = binary.BigEndian.Uint32(HeightData)
 	}
 
-	//颜色深度
+	//Color depth
 	if ColorDepthData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6ColorDepth, nil, err)
 	} else {
 		mb.picColorDepth = binary.BigEndian.Uint32(ColorDepthData)
 	}
 
-	//色数(用于 GIF 等图片格式)
+	//Number of colors used (for indexed-color pictures (e.g. GIF))
 	if ColorsData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6Colors, nil, err)
 	} else {
 		mb.picColorAmount = binary.BigEndian.Uint32(ColorsData)
 	}
 
-	//图片原始数据
+	//Binary picture data
 	if PicLengthData, err := r.ReadBytes(4); err != nil {
 		return types.NewException(TMFlac_CanNotRead_MetaT6DataLength, nil, err)
 	} else {
