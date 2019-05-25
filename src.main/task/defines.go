@@ -49,9 +49,9 @@ var TMTask_UnhandledThrowable = types.NewMask(
 	"执行 任务配置文件 时产生了若干个未被处理的错误:",
 )
 
-var TMFilter_FailedTo_Parse_FilterPattern = types.NewMask(
-	"FailedTo_Parse_FilterPattern",
-	"无法解析过滤表达式:\n表达式：{{pattern}}",
+var TMFilter_FailedTo_CompileRegex = types.NewMask(
+	"FailedTo_CompileRegex",
+	"无法编译正则表达式",
 )
 
 var TMFilter_UnableToParse_Arg = types.NewMask(

@@ -2,7 +2,9 @@ package task
 
 import (
 	"dadp.flactool/types"
+	"net/url"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -22,4 +24,33 @@ func Filter_FmtFileName(input string, extraArgs map[string]interface{}) (string,
 	input = strings.ReplaceAll(input, "\u003E", "\uFF1E")
 	input = strings.ReplaceAll(input, "\u007C", "\uFF5C")
 	return input, nil
+}
+
+var TMArg_FailedTo_Parse_URISequence = types.NewMask(
+	"FailedTo_Parse_URISequence",
+	"无法解析编码的URI序列",
+)
+
+func Filter_DecodeURI(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
+	input = strings.ToUpper(input)
+	if matched, err := regexp.MatchString("^([0-9A-F]{2})+$", input); err != nil {
+		return "", types.NewException(TMFilter_FailedTo_CompileRegex, nil, err)
+	} else if !matched {
+		return "", types.Mismatched_Format_Exception("Regex:$([0-9A-Z]{2})+^", input)
+	}
+
+	encodeBuffer := types.NewBuffer()
+	if regex, err := regexp.Compile("[0-9A-F]{2}"); err != nil {
+		return "", types.NewException(TMFilter_FailedTo_CompileRegex, nil, err)
+	} else {
+		for _, charCode := range regex.FindAllString(input, -1) {
+			encodeBuffer.WriteStringsIE("%", charCode)
+		}
+	}
+
+	if decodedValue, err := url.QueryUnescape(encodeBuffer.String()); err != nil {
+		return "", types.NewException(TMArg_FailedTo_Parse_URISequence, nil, err)
+	} else {
+		return decodedValue, nil
+	}
 }
