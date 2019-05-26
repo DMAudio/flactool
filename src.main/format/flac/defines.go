@@ -14,9 +14,19 @@ var TMFlac_CanNotSaveTo_File = types.NewMask(
 	"无法保存到文件",
 )
 
+var TMFlac_UndefinedObject = types.NewMask(
+	"UNDEFINED_OBJECT",
+	"对象未定义",
+)
+
 var TMFlac_UninitializedObject = types.NewMask(
 	"UNINITIALIZED_OBJECT",
 	"对象未初始化",
+)
+
+var TMFlac_CanNotAssert_FlacObject = types.NewMask(
+	"CAN_NOT_ASSERT_FlacObject",
+	"断言对象为*Flac失败",
 )
 
 var TMFlac_CanNotRead_FileSignature = types.NewMask(

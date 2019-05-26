@@ -5,13 +5,7 @@ import (
 	"strings"
 )
 
-func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exception) {
-	var err *types.Exception
-	var globalFlac *Flac
-	if globalFlac, err = GlobalFlacInit(); err != nil {
-		return "", err
-	}
-
+func TaskHandler_MAIN_SortBlocks(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	var searchPatterns []string
 	if sortItemsParsed, err := types.InterfaceToStringSlice(args, types.TypeString_Error); err != nil {
 		return nil, err
@@ -23,7 +17,7 @@ func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exceptio
 		searchPatterns = append([]string{MetaBlockTypeStr_STREAMINFO}, searchPatterns...)
 	}
 
-	blocks := globalFlac.GetBlocks()
+	blocks := flac.GetBlocks()
 	blockUnMatched := make([]int, len(blocks), len(blocks))
 	blockMatched := make([]int, 0, len(blockUnMatched))
 	preserveUnMatchedBlocks := -1
@@ -35,7 +29,7 @@ func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exceptio
 		if pattern == "..." {
 			preserveUnMatchedBlocks = len(blockMatched) - 1
 		}
-		if blockIndexes, err := globalFlac.FindBlocks(pattern); err != nil {
+		if blockIndexes, err := flac.FindBlocks(pattern); err != nil {
 			return nil, err
 		} else if blockIndexes != nil && len(blockIndexes) != 0 {
 			for _, blockIndex := range blockIndexes {
@@ -57,18 +51,12 @@ func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exceptio
 		newBlockList[i] = blocks[blockIndex]
 	}
 
-	globalFlac.SetBlocks(newBlockList)
+	flac.SetBlocks(newBlockList)
 
 	return nil, nil
 }
 
-func TaskHandler_MAIN_DeleteBlocks(args interface{}) (interface{}, *types.Exception) {
-	var err *types.Exception
-	var globalFlac *Flac
-	if globalFlac, err = GlobalFlacInit(); err != nil {
-		return "", err
-	}
-
+func TaskHandler_MAIN_DeleteBlocks(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	var searchPatterns []string
 	if sortItemsParsed, err := types.InterfaceToStringSlice(args, types.TypeString_Error); err != nil {
 		return nil, err
@@ -76,14 +64,14 @@ func TaskHandler_MAIN_DeleteBlocks(args interface{}) (interface{}, *types.Except
 		searchPatterns = sortItemsParsed
 	}
 
-	blocks := globalFlac.GetBlocks()
+	blocks := flac.GetBlocks()
 	blockUnMatched := make([]int, len(blocks), len(blocks))
 	for i := 0; i < cap(blockUnMatched); i++ {
 		blockUnMatched[i] = i
 	}
 	for _, pattern := range searchPatterns {
 		pattern = strings.TrimSpace(pattern)
-		if blockIndexes, err := globalFlac.FindBlocks(pattern); err != nil {
+		if blockIndexes, err := flac.FindBlocks(pattern); err != nil {
 			return nil, err
 		} else if blockIndexes != nil && len(blockIndexes) != 0 {
 			for _, blockIndex := range blockIndexes {
@@ -97,7 +85,7 @@ func TaskHandler_MAIN_DeleteBlocks(args interface{}) (interface{}, *types.Except
 		newBlockList[i] = blocks[blockIndex]
 	}
 
-	globalFlac.SetBlocks(newBlockList)
+	flac.SetBlocks(newBlockList)
 
 	return nil, nil
 }

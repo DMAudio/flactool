@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type Flac struct {
@@ -241,27 +240,4 @@ func (fObj *Flac) SetBlocks(blocks []*MetaBlock) {
 func (fObj *Flac) AppendBlock(block *MetaBlock) {
 	fObj.blocks = append(fObj.blocks, block)
 	fObj.ResetMetaBlockProperties()
-}
-
-var globalFlac *Flac
-var globalFlacLock sync.Mutex
-
-func GlobalFlac() *Flac {
-	if globalFlac == nil {
-		globalFlacLock.Lock()
-		defer globalFlacLock.Unlock()
-		if globalFlac == nil {
-			globalFlac = &Flac{}
-		}
-	}
-	return globalFlac
-}
-
-func GlobalFlacInit() (*Flac, *types.Exception) {
-	var globalFlac *Flac
-	if globalFlac = GlobalFlac(); globalFlac == nil || !globalFlac.Initialized() {
-		return nil, types.NewException(TMFlac_UninitializedObject, nil, nil)
-	}
-
-	return globalFlac, nil
 }

@@ -38,7 +38,7 @@ func ArgFilter(input string, extraArgs map[string]interface{}) (string, *types.E
 		var globalFlac *Flac
 		var blocks []*MetaBlock
 
-		if globalFlac, err = GlobalFlacInit(); err != nil {
+		if globalFlac, err = SIMap_GetFlac(extraArgs); err != nil {
 			return "", err
 		} else if blockIndexSlice, err := globalFlac.FindBlocks(blockFilter); err != nil {
 			return "", err
@@ -61,4 +61,10 @@ func ArgFilter(input string, extraArgs map[string]interface{}) (string, *types.E
 
 	return block.GetTags().Get(blockTagPath), nil
 
+}
+
+func WarpFlacToExtraArgs(flac *Flac) map[string]map[string]interface{} {
+	return map[string]map[string]interface{}{
+		"flac": {"flac": flac},
+	}
 }

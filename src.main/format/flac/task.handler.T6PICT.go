@@ -11,6 +11,7 @@ import (
 )
 
 func TaskHandler_T6PICT_Each(
+	flac *Flac,
 	args interface{},
 	argChecker func([]string) *types.Exception,
 	processor func(*MetaBlock, *MetaBlockT6PICT, []string) *types.Exception,
@@ -39,7 +40,7 @@ func TaskHandler_T6PICT_Each(
 				"[BlockFilter, ArgVal1, ...]",
 				strings.Join(argValSlice, ","),
 			)
-		} else if blockIdSlice, err := globalFlac.FindBlocks(argValSlice[0]); err != nil {
+		} else if blockIdSlice, err := flac.FindBlocks(argValSlice[0]); err != nil {
 			argValParseExceptions[errTag] = err
 		} else if err := argChecker(argValSlice[1:]); err != nil {
 			argValParseExceptions[errTag] = err
@@ -59,7 +60,7 @@ func TaskHandler_T6PICT_Each(
 	argValExecuteExceptions := map[string]*types.Exception{}
 	for _, pairVal := range BlockId_ArgVal_Pairs {
 		for _, blockIndex := range pairVal.bIdSlice {
-			block := globalFlac.GetBlockByIndex(blockIndex)
+			block := flac.GetBlockByIndex(blockIndex)
 			if blockBody, ok := block.GetBody().(*MetaBlockT6PICT); !ok {
 				argValExecuteExceptions[pairVal.errTag] = types.NewException(
 					TMFlac_CanNotAssert_METABLOCKAsSpecificType, map[string]string{
@@ -88,10 +89,10 @@ func TaskHandler_T6PICT_SingleArgChecker(args []string) *types.Exception {
 	return nil
 }
 
-func TaskHandler_T6PICT_dumpPic(args interface{}) (interface{}, *types.Exception) {
+func TaskHandler_T6PICT_dumpPic(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	handler := func(block *MetaBlock, body *MetaBlockT6PICT, args []string) *types.Exception {
 		if pathProcessed, _, err := task.GlobalArgFilter().FillArgs(args[0], map[string]map[string]interface{}{
-			"flac": {"this": block},
+			"flac": {"flac": flac, "this": block},
 		}); err != nil {
 			return err
 		} else {
@@ -101,13 +102,13 @@ func TaskHandler_T6PICT_dumpPic(args interface{}) (interface{}, *types.Exception
 		}
 		return nil
 	}
-	return nil, TaskHandler_T6PICT_Each(args, TaskHandler_T6PICT_SingleArgChecker, handler)
+	return nil, TaskHandler_T6PICT_Each(flac, args, TaskHandler_T6PICT_SingleArgChecker, handler)
 }
 
-func TaskHandler_T6PICT_setPic(args interface{}) (interface{}, *types.Exception) {
+func TaskHandler_T6PICT_setPic(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	handler := func(block *MetaBlock, body *MetaBlockT6PICT, args []string) *types.Exception {
 		if pathProcessed, _, err := task.GlobalArgFilter().FillArgs(args[0], map[string]map[string]interface{}{
-			"flac": {"this": block},
+			"flac": {"flac": flac, "this": block},
 		}); err != nil {
 			return err
 		} else {
@@ -117,13 +118,13 @@ func TaskHandler_T6PICT_setPic(args interface{}) (interface{}, *types.Exception)
 		}
 		return nil
 	}
-	return nil, TaskHandler_T6PICT_Each(args, TaskHandler_T6PICT_SingleArgChecker, handler)
+	return nil, TaskHandler_T6PICT_Each(flac, args, TaskHandler_T6PICT_SingleArgChecker, handler)
 }
 
-func TaskHandler_T6PICT_setPicType(args interface{}) (interface{}, *types.Exception) {
+func TaskHandler_T6PICT_setPicType(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	handler := func(block *MetaBlock, body *MetaBlockT6PICT, args []string) *types.Exception {
 		if picTypeProcessed, _, err := task.GlobalArgFilter().FillArgs(args[0], map[string]map[string]interface{}{
-			"flac": {"this": block},
+			"flac": {"flac": flac, "this": block},
 		}); err != nil {
 			return err
 		} else if picTypeParsed, err := strconv.ParseUint(picTypeProcessed, 10, 32); err != nil {
@@ -133,13 +134,13 @@ func TaskHandler_T6PICT_setPicType(args interface{}) (interface{}, *types.Except
 		}
 		return nil
 	}
-	return nil, TaskHandler_T6PICT_Each(args, TaskHandler_T6PICT_SingleArgChecker, handler)
+	return nil, TaskHandler_T6PICT_Each(flac, args, TaskHandler_T6PICT_SingleArgChecker, handler)
 }
 
-func TaskHandler_T6PICT_setDesc(args interface{}) (interface{}, *types.Exception) {
+func TaskHandler_T6PICT_setDesc(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	handler := func(block *MetaBlock, body *MetaBlockT6PICT, args []string) *types.Exception {
 		if descProcessed, _, err := task.GlobalArgFilter().FillArgs(args[0], map[string]map[string]interface{}{
-			"flac": {"this": block},
+			"flac": {"flac": flac, "this": block},
 		}); err != nil {
 			return err
 		} else {
@@ -147,30 +148,23 @@ func TaskHandler_T6PICT_setDesc(args interface{}) (interface{}, *types.Exception
 		}
 		return nil
 	}
-	return nil, TaskHandler_T6PICT_Each(args, TaskHandler_T6PICT_SingleArgChecker, handler)
+	return nil, TaskHandler_T6PICT_Each(flac, args, TaskHandler_T6PICT_SingleArgChecker, handler)
 }
 
-func TaskHandler_T6PICT_getDesc(args interface{}) (interface{}, *types.Exception) {
-	var err *types.Exception
-
-	var globalFlac *Flac
-	if globalFlac, err = GlobalFlacInit(); err != nil {
-		return nil, err
-	}
-
+func TaskHandler_T6PICT_getDesc(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	if argParsed, ok := args.(string); !ok {
 		return nil, types.Exception_Mismatched_Format("Type:string", reflect.TypeOf(args).String())
-	} else if pattern, _, err := task.GlobalArgFilter().FillArgs(argParsed, nil); err != nil {
+	} else if pattern, _, err := task.GlobalArgFilter().FillArgs(argParsed, WarpFlacToExtraArgs(flac)); err != nil {
 		return nil, err
 	} else {
 		results := make([]string, 0)
 		var blockIndexSlice []int
-		blockIndexSlice, err = globalFlac.FindBlocks(pattern)
+		blockIndexSlice, err = flac.FindBlocks(pattern)
 		if err != nil {
 			return nil, err
 		}
 		for _, blockIndex := range blockIndexSlice {
-			block := globalFlac.GetBlockByIndex(blockIndex)
+			block := flac.GetBlockByIndex(blockIndex)
 			if blockBody, ok := block.GetBody().(*MetaBlockT6PICT); !ok {
 				return nil, types.NewException(TMFlac_CanNotAssert_METABLOCKAsSpecificType, map[string]string{
 					"index": strconv.Itoa(blockIndex),
@@ -184,7 +178,7 @@ func TaskHandler_T6PICT_getDesc(args interface{}) (interface{}, *types.Exception
 	}
 }
 
-func TaskHandler_T6PICT_addPic(args interface{}) (interface{}, *types.Exception) {
+func TaskHandler_T6PICT_addPic(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	if argsParsed, err := types.InterfaceToStringMap(args); err != nil {
 		return nil, err
 	} else {
@@ -211,11 +205,6 @@ func TaskHandler_T6PICT_addPic(args interface{}) (interface{}, *types.Exception)
 			}, nil)
 		}
 
-		var globalFlac *Flac
-		if globalFlac, err = GlobalFlacInit(); err != nil {
-			return nil, err
-		}
-
 		blockBody := &MetaBlockT6PICT{}
 		blockBody.SetPicType(picType)
 		if err := blockBody.ParsePictureFile(picPath); err != nil {
@@ -227,7 +216,7 @@ func TaskHandler_T6PICT_addPic(args interface{}) (interface{}, *types.Exception)
 			blockBody.SetPicDesc(picDesc)
 		}
 
-		globalFlac.AppendBlock(NewMetaBlock(blockBody))
+		flac.AppendBlock(NewMetaBlock(blockBody))
 	}
 	return nil, nil
 }

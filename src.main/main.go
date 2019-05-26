@@ -26,8 +26,11 @@ func main() {
 
 	config.ParseFlags()
 
+	fObj := &flac.Flac{}
 	if *inputFile != "" {
-		flac.GlobalFlac().ParseFromFile(*inputFile)
+		if err := fObj.ParseFromFile(*inputFile); err != nil {
+			types.Throw(err, types.RsPanic)
+		}
 	} else {
 		panic("未指定源文件")
 	}
@@ -37,14 +40,14 @@ func main() {
 	} else if taskList, err := task.LoadTaskList(*taskFile); err != nil {
 		types.Throw(err, types.RsError)
 	} else if err := taskList.ExecuteTasks(map[string]interface{}{
-
+		"flac": fObj,
 	}); err != nil {
 		types.Throw(err, types.RsError)
 	} else if *outputFile != "" {
-		if outputFileProcessed, _, err := task.GlobalArgFilter().FillArgs(*outputFile, nil); err != nil {
+		if outputFileProcessed, _, err := task.GlobalArgFilter().FillArgs(*outputFile, flac.WarpFlacToExtraArgs(fObj)); err != nil {
 			types.Throw(err, types.RsError)
 		} else {
-			flac.GlobalFlac().WriteToFile(outputFileProcessed)
+			fObj.WriteToFile(outputFileProcessed)
 		}
 	}
 }
