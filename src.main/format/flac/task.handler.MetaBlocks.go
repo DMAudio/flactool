@@ -13,7 +13,7 @@ func TaskHandler_MAIN_SortBlocks(args interface{}) (interface{}, *types.Exceptio
 	}
 
 	var searchPatterns []string
-	if sortItemsParsed, err := types.InterfaceToStringSlice(args); err != nil {
+	if sortItemsParsed, err := types.InterfaceToStringSlice(args, types.TypeString_Error); err != nil {
 		return nil, err
 	} else {
 		searchPatterns = sortItemsParsed
@@ -70,7 +70,7 @@ func TaskHandler_MAIN_DeleteBlocks(args interface{}) (interface{}, *types.Except
 	}
 
 	var searchPatterns []string
-	if sortItemsParsed, err := types.InterfaceToStringSlice(args); err != nil {
+	if sortItemsParsed, err := types.InterfaceToStringSlice(args, types.TypeString_Error); err != nil {
 		return nil, err
 	} else {
 		searchPatterns = sortItemsParsed

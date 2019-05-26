@@ -23,7 +23,7 @@ func Handler_COMMON_Cmd(args interface{}) (interface{}, *types.Exception) {
 	var argsRaw []string
 	var exception *types.Exception
 	var err error
-	if argsRaw, exception = types.InterfaceToStringSlice(args); exception != nil {
+	if argsRaw, exception = types.InterfaceToStringSlice(args, types.TypeString_Error); exception != nil {
 		return nil, exception
 	}
 

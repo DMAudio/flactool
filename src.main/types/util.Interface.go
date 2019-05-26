@@ -34,7 +34,36 @@ func MapItem_Parsed_Failed(key string, cause *Exception) *Exception {
 	}, cause)
 }
 
-func InterfaceToStringSlice(input interface{}) ([]string, *Exception) {
+func InterfaceToInterfaceSlice(input interface{}) ([]interface{}, *Exception) {
+	result := make([]interface{}, 0)
+	if input == nil {
+		return result, nil
+	}
+
+	if inputSliceParsed, ok := input.([]interface{}); !ok {
+		return nil, Exception_Mismatched_Format("Kind:Slice",
+			"Kind:"+reflect.TypeOf(input).Kind().String(),
+		)
+	} else {
+		for _, inputRaw := range inputSliceParsed {
+			if inputRaw == nil {
+				continue
+			}
+			result = append(result, inputRaw)
+		}
+		return result, nil
+	}
+}
+
+type SliceOpt uint8
+
+const (
+	TypeString_Split SliceOpt = 1 << (8 - 1 - iota) // split string into slice by ','
+	TypeString_Warp                                 // warp string as [1]string
+	TypeString_Error                                // throw error when trying to parse string
+)
+
+func InterfaceToStringSlice(input interface{}, option SliceOpt) ([]string, *Exception) {
 	result := make([]string, 0)
 
 	if input == nil {
@@ -43,25 +72,32 @@ func InterfaceToStringSlice(input interface{}) ([]string, *Exception) {
 
 	switch input.(type) {
 	case string:
-		inputSliceParsed := strings.Split(input.(string), ",")
-		for _, inputRaw := range inputSliceParsed {
-			inputRaw = strings.TrimSpace(inputRaw)
-			if inputRaw == "" {
-				continue
-			}
-			result = append(result, inputRaw)
-		}
-		return result, nil
-	case []interface{}:
-		if inputSliceParsed, ok := input.([]interface{}); !ok {
-			return nil, Mismatched_Format_Exception("Kind:Slice",
-				"Kind:"+reflect.TypeOf(input).Kind().String(),
-			)
-		} else {
-			for inputIndex, inputRaw := range inputSliceParsed {
-				if inputRaw == nil {
+		switch {
+		case option&TypeString_Split != 0:
+			inputSliceParsed := strings.Split(input.(string), ",")
+			for _, inputRaw := range inputSliceParsed {
+				inputRaw = strings.TrimSpace(inputRaw)
+				if inputRaw == "" {
 					continue
 				}
+				result = append(result, inputRaw)
+			}
+			return result, nil
+		case option&TypeString_Warp != 0:
+			return []string{input.(string)}, nil
+		default:
+			fallthrough
+		case option&TypeString_Error != 0:
+			return nil, Exception_Mismatched_Format(
+				"Kind:Slice",
+				"Type:String",
+			)
+		}
+	case []interface{}:
+		if inputSliceParsed, err := InterfaceToInterfaceSlice(input); err != nil {
+			return nil, err
+		} else {
+			for inputIndex, inputRaw := range inputSliceParsed {
 				inputRaw = strings.TrimSpace(inputRaw.(string))
 				if inputRaw == "" {
 					continue

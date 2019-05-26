@@ -180,7 +180,7 @@ func TaskHandler_T4VORB_loadTags(args interface{}) (interface{}, *types.Exceptio
 func TaskHandler_T4VORB_DeleteTags(args interface{}) (interface{}, *types.Exception) {
 	if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
-	} else if argList, err := types.InterfaceToStringSlice(args); err != nil {
+	} else if argList, err := types.InterfaceToStringSlice(args, types.TypeString_Split); err != nil {
 		return nil, err
 	} else {
 		for _, arg := range argList {
@@ -193,7 +193,7 @@ func TaskHandler_T4VORB_DeleteTags(args interface{}) (interface{}, *types.Except
 func TaskHandler_T4VORB_SortTags(args interface{}) (interface{}, *types.Exception) {
 	if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
-	} else if sortBy, err := types.InterfaceToStringSlice(args); err != nil {
+	} else if sortBy, err := types.InterfaceToStringSlice(args, types.TypeString_Split); err != nil {
 		return nil, err
 	} else {
 		body.SortComment(sortBy)
