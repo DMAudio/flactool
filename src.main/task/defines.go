@@ -49,6 +49,21 @@ var TMTask_UnhandledThrowable = types.NewMask(
 	"执行 任务配置文件 时产生了若干个未被处理的错误:",
 )
 
+var TMTask_FailedTo_Parse_WhenPattern = types.NewMask(
+	"FailedTo_Parse_WhenPattern",
+	"无法解析开关表达式:\n{{pattern}}",
+)
+
+var TMTask_UnableToParse_SubArg = types.NewMask(
+	"UNABLE_TO_PARSE_SubARG",
+	"子参数解析失败",
+)
+
+var TMTask_UnableToExecute_SubTask = types.NewMask(
+	"UNABLE_TO_Execute_SubTask",
+	"子任务执行失败",
+)
+
 var TMFilter_FailedTo_CompileRegex = types.NewMask(
 	"FailedTo_CompileRegex",
 	"无法编译正则表达式",

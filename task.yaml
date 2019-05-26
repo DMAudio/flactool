@@ -1,85 +1,84 @@
 TASKS:
   - OWNER: VORBIS_COMMENT
+    # WHEN: "{@env:execMod}=A"
     LIST:
       - OPER: setRefer
         ARGS: "Digimon Audiopedia Database Project®"
       - OPER: printRefer
 
-  - OWNER: VORBIS_COMMENT
-    LIST:
-      - OPER: dumpTags
-        ARGS: "{@env:outputDir}/tags.txt"
+  # - OWNER: VORBIS_COMMENT
+  #   LIST:
+  #     - OPER: dumpTags
+  #       ARGS: "{@env:outputDir}/tags.txt"
 
-#  - OWNER: COMMON
-#    LIST:
-#      - OPER: execute
-#        ARGS:
-#          - go_build_main.exe
-#  - OWNER: COMMON
-#    LIST:
-#      - OPER: execute
-#        ARGS:
-#          - 程序路径
-#          - "-参数1"
-#          - "-参数2"
-#          - "-参数3"
+  #  - OWNER: COMMON
+  #    LIST:
+  #      - OPER: execute
+  #        ARGS:
+  #          - go_build_main.exe
+  #  - OWNER: COMMON
+  #    LIST:
+  #      - OPER: execute
+  #        ARGS:
+  #          - 程序路径
+  #          - "-参数1"
+  #          - "-参数2"
+  #          - "-参数3"
 
-  - OWNER: VORBIS_COMMENT
-    LIST:
-      - OPER: importTags
-        ARGS: tags.txt
-#      - OPER: setTags
-#        ARGS:
-#          - ALBUM=balabalabla
-#          - ARTIST=BALABALABA
-#      - OPER: deleteTags
-#        ARGS: ALBUM,ARTIST,CAT#
-#      - OPER: printTags
-#
-#  - OWNER: VORBIS_COMMENT
-#    LIST:
-#      - OPER: sortTags
-#        ARGS: [ARTIST, TITLE, ALBUM, DATE, GENRE, TRACKNUMBER, TRACKTOTAL,
-#               DISCNUMBER, DISCTOTAL, EAN-13, CAT#]
-#      - OPER: printTags
-#
-#
-#  - OWNER: PICTURE
-#    LIST:
-#      - OPER: setPicType
-#        ARGS:
-#          - "PICTURE:body.fileSize=692662 -> 3"
-#          - "PICTURE:body.fileSize=570226 -> 6"
-#      - OPER: setDesc
-#        ARGS:
-#          - "PICTURE:body.fileSize=692662 -> Type3.Desc"
-#          - "PICTURE:body.fileSize=570226 -> Type6.Desc"
-#      - OPER: getDesc
-#        ARGS:
-#          - "PICTURE"
-#      - OPER: addPic
-#        ARGS:
-#          type: 21
-#          desc: 介绍巴拉巴拉
-#          path: D1LP_pYU8AAHQNr.jpg
-#      - OPER: setPic
-#        ARGS:
-#          - "PICTURE:body.type=3 -> _block2_type3_692662.png"
-#      - OPER: dumpPic
-#        ARGS:
-#          - PICTURE -> {@flac:VORBIS_COMMENT->body.CAT#}_{@flac:this->index}_{@flac:this->body.type}_{@flac:this->body.desc}.png
-#          - PICTURE:body.type=3 -> {@flac:VORBIS_COMMENT->body.CAT#}.{@flac:this->body.type}.png
+  # - OWNER: VORBIS_COMMENT
+  #   LIST:
+  #     - OPER: importTags
+  #       ARGS: tags.txt
 
+  #     - OPER: setTags
+  #       ARGS:
+  #         - ALBUM=balabalabla
+  #         - ARTIST=BALABALABA
+  #     - OPER: deleteTags
+  #       ARGS: ALBUM,ARTIST,CAT#
+  #     - OPER: printTags
 
-#  - OWNER: BLOCKS
-#    LIST:
-#      - OPER: deleteBlocks
-#        ARGS:
-#          - PICTURE:body.fileSize=570226
-#      - OPER: sortBlocks
-#        ARGS:
-#          - STREAMINFO
-#          - VORBIS_COMMENT
-#          - PICTURE:body.type=3
-#          - PICTURE:body.type=6
-#          - ...
+  # - OWNER: VORBIS_COMMENT
+  #   LIST:
+  #     - OPER: sortTags
+  #       ARGS: [ARTIST, TITLE, ALBUM, DATE, GENRE, TRACKNUMBER, TRACKTOTAL,
+  #              DISCNUMBER, DISCTOTAL, EAN-13, CAT#]
+  #     - OPER: printTags
+
+  # - OWNER: PICTURE
+  #   LIST:
+  #     - OPER: setPicType
+  #       ARGS:
+  #         - ["PICTURE:body.fileSize=692662", "3"]
+  #         - ["PICTURE:body.fileSize=570226", "6"]
+  #     - OPER: setDesc
+  #       ARGS:
+  #         - ["PICTURE:body.fileSize=692662", "Type3.Desc"]
+  #         - ["PICTURE:body.fileSize=570226", "Type6.Desc"]
+  #     - OPER: getDesc
+  #       ARGS: "PICTURE"
+  #     - OPER: addPic
+  #       ARGS:
+  #         type: "6"
+  #         desc: "Description"
+  #         path: "D1LP_pYU8AAHQNr.jpg"
+  #     - OPER: setPic
+  #       ARGS:
+  #         - ["PICTURE:body.type=3", "_block2_type3_692662.png"]
+  #     - OPER: dumpPic
+  #       ARGS:
+  #         - ["PICTURE", "{@flac:VORBIS_COMMENT->body.CAT#}_{@flac:this->index}_{@flac:this->body.type}_{@flac:this->body.desc}.png"]
+  #         - ["PICTURE:body.type=3", "{@flac:VORBIS_COMMENT->body.CAT#}.{@flac:this->body.type}.png"]
+
+  #  - OWNER: BLOCKS
+  #    LIST:
+  #      - OPER: deleteBlocks
+  #        ARGS:
+  #          - PICTURE:body.fileSize=570226
+  #      - OPER: sortBlocks
+  #        ARGS:
+  #          - STREAMINFO
+  #          - VORBIS_COMMENT
+  #          - PICTURE:body.type=3
+  #          - PICTURE:body.type=6
+  #          - ...
