@@ -10,10 +10,12 @@ import (
 
 var inputFile *string
 var outputFile *string
+var taskFile *string
 
 func InitMain() {
 	inputFile = flag.String("input", "", "path to the source file")
 	outputFile = flag.String("output", "", "path which task result shall be saved to")
+	taskFile = flag.String("task", "", "path to the task list file")
 }
 
 func main() {
@@ -30,15 +32,13 @@ func main() {
 		panic("未指定源文件")
 	}
 
-	if *task.CollectionFile != "" {
-		if err := task.ExecuteTasks(); err != nil {
-			types.Throw(err, types.RsError)
-		}
-	} else {
+	if *taskFile == "" {
 		panic("未指定任务配置文件")
-	}
-
-	if *outputFile != "" {
+	} else if taskList, err := task.LoadTaskList(*taskFile); err != nil {
+		types.Throw(err, types.RsError)
+	} else if err := taskList.ExecuteTasks(); err != nil {
+		types.Throw(err, types.RsError)
+	} else if *outputFile != "" {
 		if outputFileProcessed, _, err := task.GlobalArgFilter().FillArgs(*outputFile, nil); err != nil {
 			types.Throw(err, types.RsError)
 		} else {

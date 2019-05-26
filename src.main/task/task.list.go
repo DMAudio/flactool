@@ -3,7 +3,6 @@ package task
 import (
 	"dadp.flactool/config"
 	"dadp.flactool/types"
-	"flag"
 	"fmt"
 	"strconv"
 	"strings"
@@ -20,13 +19,11 @@ type Collection struct {
 	List  []*Item
 }
 
-var CollectionFile *string
+type List struct {
+	Collections []*Collection
+}
 
 func Init() *types.Exception {
-	config.NewRegister(func() {
-		CollectionFile = flag.String("task", "", "path to the task list file")
-	})
-
 	if err := GlobalHandler().Register("COMMON", Handler_COMMON); err != nil {
 		return err
 	}
@@ -109,9 +106,12 @@ func parseTaskCollection(TaskCollectionRaw interface{}) (*Collection, interface{
 
 }
 
-func LoadTaskList() ([]*Collection, *types.Exception) {
-	Collections := make([]*Collection, 0)
-	if fileParsed, err := config.ParseConfig(*CollectionFile); err != nil {
+func LoadTaskList(filePath string) (*List, *types.Exception) {
+	taskList := List{
+		Collections: make([]*Collection, 0),
+	}
+
+	if fileParsed, err := config.ParseConfig(filePath); err != nil {
 		return nil, types.NewException(TMConfig_UnableToRead_TaskFile, nil, err)
 
 	} else if TaskCollectionsRaw, ok := fileParsed["tasks"]; !ok || TaskCollectionsRaw == nil {
@@ -131,50 +131,47 @@ func LoadTaskList() ([]*Collection, *types.Exception) {
 					"collection": strconv.Itoa(CollectionIndex + 1),
 				}, err)
 			} else {
-				Collections = append(Collections, CollectionParsed)
+				taskList.Collections = append(taskList.Collections, CollectionParsed)
 			}
 		}
 	}
 
-	return Collections, nil
+	return &taskList, nil
 }
 
-func ExecuteTasks() *types.Exception {
-	if Collections, err := LoadTaskList(); err != nil {
-		return err
-	} else {
-		UnhandledErr := map[string]*types.Exception{}
-		for cIndex, collection := range Collections {
-			UnhandledErrInCollection := map[string]*types.Exception{}
+func (t *List) ExecuteTasks() *types.Exception {
+	UnhandledErr := map[string]*types.Exception{}
+	for cIndex, collection := range t.Collections {
+		UnhandledErrInCollection := map[string]*types.Exception{}
 
-			if collection.When != "" {
-				if whenStrParsed, _, err := GlobalArgFilter().FillArgs(collection.When, nil); err != nil {
-					UnhandledErrInCollection["_when_"] = types.NewException(TMTask_FailedTo_Parse_WhenPattern, nil, err)
-				} else if whenStrSplit := strings.SplitN(whenStrParsed, "->", 2); len(whenStrSplit) != 2 {
-					UnhandledErrInCollection["_when_"] = types.Exception_Mismatched_Format(
-						"LeftPattern->RightPattern",
-						whenStrParsed,
-					)
-				} else if strings.TrimSpace(whenStrSplit[0]) != strings.TrimSpace(whenStrSplit[1]) {
-					continue
-				}
-			}
-
-			for tIndex, task := range collection.List {
-				if err := GlobalHandler().Execute(collection.Owner, task.Operation, task.Arguments); err != nil {
-					UnhandledErrInCollection["T"+strconv.Itoa(tIndex)] = err
-				}
-			}
-			if len(UnhandledErrInCollection) > 0 {
-				UnhandledErr["C"+strconv.Itoa(cIndex)] = types.NewException(TMTask_Collection_UnhandledThrowable, map[string]string{
-					"collection": strconv.Itoa(cIndex),
-					"handler":    collection.Owner,
-				}, UnhandledErrInCollection)
+		if collection.When != "" {
+			if whenStrParsed, _, err := GlobalArgFilter().FillArgs(collection.When, nil); err != nil {
+				UnhandledErrInCollection["_when_"] = types.NewException(TMTask_FailedTo_Parse_WhenPattern, nil, err)
+			} else if whenStrSplit := strings.SplitN(whenStrParsed, "->", 2); len(whenStrSplit) != 2 {
+				UnhandledErrInCollection["_when_"] = types.Exception_Mismatched_Format(
+					"LeftPattern->RightPattern",
+					whenStrParsed,
+				)
+			} else if strings.TrimSpace(whenStrSplit[0]) != strings.TrimSpace(whenStrSplit[1]) {
+				continue
 			}
 		}
-		if len(UnhandledErr) > 0 {
-			return types.NewException(TMTask_UnhandledThrowable, nil, UnhandledErr)
+
+		for tIndex, task := range collection.List {
+			if err := GlobalHandler().Execute(collection.Owner, task.Operation, task.Arguments); err != nil {
+				UnhandledErrInCollection["T"+strconv.Itoa(tIndex)] = err
+			}
+		}
+		if len(UnhandledErrInCollection) > 0 {
+			UnhandledErr["C"+strconv.Itoa(cIndex)] = types.NewException(TMTask_Collection_UnhandledThrowable, map[string]string{
+				"collection": strconv.Itoa(cIndex),
+				"handler":    collection.Owner,
+			}, UnhandledErrInCollection)
 		}
 	}
+	if len(UnhandledErr) > 0 {
+		return types.NewException(TMTask_UnhandledThrowable, nil, UnhandledErr)
+	}
+
 	return nil
 }
