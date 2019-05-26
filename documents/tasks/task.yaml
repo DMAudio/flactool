@@ -1,6 +1,6 @@
 TASKS:
   - OWNER: VORBIS_COMMENT
-    # WHEN: "{@env:execMod}=A"
+    # WHEN: "{@env:execMod}->A"
     LIST:
       - OPER: setRefer
         ARGS: "Digimon Audiopedia Database Project®"

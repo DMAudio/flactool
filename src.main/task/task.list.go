@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type Item struct {
@@ -15,6 +16,7 @@ type Item struct {
 
 type Collection struct {
 	Owner string
+	When  string
 	List  []*Item
 }
 
@@ -77,8 +79,18 @@ func parseTaskCollection(TaskCollectionRaw interface{}) (*Collection, interface{
 	} else if CollectionListParsed, ok := CollectionListRaw.([]interface{}); !ok {
 		return nil, fmt.Errorf("主键 LIST 格式不正确")
 	} else {
+		whenStr := ""
+		if CollectionWhenRaw, ok := CollectionParsed["WHEN"]; ok {
+			if CollectionWhenParsed, ok := CollectionWhenRaw.(string); !ok {
+				return nil, fmt.Errorf("主键 WHEN 应为String型")
+			} else {
+				whenStr = strings.TrimSpace(CollectionWhenParsed)
+			}
+		}
+
 		collection := &Collection{
 			Owner: CollectionOwnerParsed,
+			When:  whenStr,
 			List:  []*Item{},
 		}
 
@@ -134,6 +146,20 @@ func ExecuteTasks() *types.Exception {
 		UnhandledErr := map[string]*types.Exception{}
 		for cIndex, collection := range Collections {
 			UnhandledErrInCollection := map[string]*types.Exception{}
+
+			if collection.When != "" {
+				if whenStrParsed, _, err := GlobalArgFilter().FillArgs(collection.When, nil); err != nil {
+					UnhandledErrInCollection["_when_"] = types.NewException(TMTask_FailedTo_Parse_WhenPattern, nil, err)
+				} else if whenStrSplit := strings.SplitN(whenStrParsed, "->", 2); len(whenStrSplit) != 2 {
+					UnhandledErrInCollection["_when_"] = types.Exception_Mismatched_Format(
+						"LeftPattern->RightPattern",
+						whenStrParsed,
+					)
+				} else if strings.TrimSpace(whenStrSplit[0]) != strings.TrimSpace(whenStrSplit[1]) {
+					continue
+				}
+			}
+
 			for tIndex, task := range collection.List {
 				if err := GlobalHandler().Execute(collection.Owner, task.Operation, task.Arguments); err != nil {
 					UnhandledErrInCollection["T"+strconv.Itoa(tIndex)] = err
