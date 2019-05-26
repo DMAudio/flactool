@@ -17,16 +17,23 @@ import (
 var startTime = strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10)
 
 func FileWriteString(fPath string, str string) error {
-	if absPath, err := filepath.Abs(strings.TrimSpace(fPath)); err != nil {
+	var absPath string
+	var err error
+	if absPath, err = filepath.Abs(strings.TrimSpace(fPath)); err != nil {
 		return fmt.Errorf("无法解析文件绝对路径")
-	} else if _, err := os.Stat(path.Dir(fPath)); os.IsNotExist(err) {
-		if err := os.MkdirAll(path.Dir(fPath), 0644); err != nil && !os.IsExist(err) {
-			panic(fmt.Errorf("无法创建日志目录：%s", path.Dir(fPath)))
+	}
+
+	if _, err := os.Stat(path.Dir(fPath)); os.IsNotExist(err) {
+		if err := os.MkdirAll(path.Dir(fPath), 0777); err != nil && !os.IsExist(err) {
+			return fmt.Errorf("无法创建日志目录：%s\n%v", path.Dir(fPath), err)
 		}
-	} else if file, err := os.Create(absPath); err != nil {
+	}
+
+	if file, err := os.Create(absPath); err != nil {
 		return fmt.Errorf("无法创建文件")
 	} else {
 		defer func() { _ = file.Close() }()
+
 		if _, err := file.WriteString(str); err != nil {
 			return fmt.Errorf("无法写入文件")
 		}
@@ -176,7 +183,18 @@ func main() {
 			if errStr != "" {
 				taskFailed = append(taskFailed, path.Base(inputFile))
 
-				logPath := path.Join(*logDir, path.Base(inputFile)+"_err.log")
+				logBase := path.Base(inputFile) + "_err.log"
+				logBase = strings.ReplaceAll(logBase, "\u003A", "\uFF1A")
+				logBase = strings.ReplaceAll(logBase, "\u002F", "\uFF0F")
+				logBase = strings.ReplaceAll(logBase, "\u005C", "\uFF3C")
+				logBase = strings.ReplaceAll(logBase, "\u003F", "\uFF1F")
+				logBase = strings.ReplaceAll(logBase, "\u0022", "\u0027\u0027")
+				logBase = strings.ReplaceAll(logBase, "\u002A", "\uFF0A")
+				logBase = strings.ReplaceAll(logBase, "\u003C", "\uFF1C")
+				logBase = strings.ReplaceAll(logBase, "\u003E", "\uFF1E")
+				logBase = strings.ReplaceAll(logBase, "\u007C", "\uFF5C")
+
+				logPath := path.Join(*logDir, logBase)
 				if err := FileWriteString(logPath, errStr); err != nil {
 					panic(fmt.Errorf("无法创建日志文件：%s\n%v", logPath, err))
 				}
