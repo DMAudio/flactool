@@ -37,6 +37,10 @@ func Init() *types.Exception {
 		return err
 	}
 
+	if err := GlobalArgFilter().Register("u", Filter_DecodeURI); err != nil {
+		return err
+	}
+
 	return nil
 }
 
