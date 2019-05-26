@@ -7,7 +7,7 @@ import (
 )
 
 type Handler struct {
-	list map[string]func(string, interface{}) (interface{}, *types.Exception)
+	list map[string]func(string, map[string]interface{}, interface{}) (interface{}, *types.Exception)
 }
 
 var TMTask_Output = types.NewMask(
@@ -15,7 +15,10 @@ var TMTask_Output = types.NewMask(
 	"\n{{value}}",
 )
 
-func (h *Handler) Register(handler string, handlerFunc func(string, interface{}) (interface{}, *types.Exception)) *types.Exception {
+func (h *Handler) Register(
+	handler string,
+	handlerFunc func(string, map[string]interface{}, interface{},
+) (interface{}, *types.Exception)) *types.Exception {
 	if _, exist := h.list[handler]; exist {
 		return types.NewException(TMTask_CanNotRegister, map[string]string{
 			"reason": "执行者名称冲突",
@@ -27,12 +30,16 @@ func (h *Handler) Register(handler string, handlerFunc func(string, interface{})
 	return nil
 }
 
-func (h *Handler) Execute(handler string, operation string, args interface{}) *types.Exception {
+func (h *Handler) Execute(
+	handler string,
+	operation string,
+	env map[string]interface{}, args interface{},
+) *types.Exception {
 	if handlerFunc, exist := h.list[handler]; !exist {
 		return types.NewException(TMTask_CanNotExecute, map[string]string{
 			"reason": "执行者不存在",
 		}, nil)
-	} else if output, err := handlerFunc(operation, args); err != nil {
+	} else if output, err := handlerFunc(operation, env, args); err != nil {
 		return err
 	} else if output != nil {
 		types.Throw(types.NewException(TMTask_Output, map[string]string{
@@ -52,7 +59,7 @@ func GlobalHandler() *Handler {
 		defer globalHandlerLock.Unlock()
 		if globalHandler == nil {
 			globalHandler = &Handler{
-				list: map[string]func(string, interface{}) (interface{}, *types.Exception){},
+				list: map[string]func(string, map[string]interface{}, interface{}) (interface{}, *types.Exception){},
 			}
 		}
 	}

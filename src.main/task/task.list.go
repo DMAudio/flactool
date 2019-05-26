@@ -23,26 +23,6 @@ type List struct {
 	Collections []*Collection
 }
 
-func Init() *types.Exception {
-	if err := GlobalHandler().Register("COMMON", Handler_COMMON); err != nil {
-		return err
-	}
-
-	if err := GlobalArgFilter().Register("env", Filter_Env); err != nil {
-		return err
-	}
-
-	if err := GlobalArgFilter().Register("fmtFName", Filter_FmtFileName); err != nil {
-		return err
-	}
-
-	if err := GlobalArgFilter().Register("u", Filter_DecodeURI); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func parseTaskItem(TaskItemRaw interface{}) (*Item, interface{}) {
 	if TaskItemParsed, ok := TaskItemRaw.(map[interface{}]interface{}); !ok {
 		return nil, fmt.Errorf("格式不正确")
@@ -139,7 +119,7 @@ func LoadTaskList(filePath string) (*List, *types.Exception) {
 	return &taskList, nil
 }
 
-func (t *List) ExecuteTasks() *types.Exception {
+func (t *List) ExecuteTasks(env map[string]interface{}) *types.Exception {
 	UnhandledErr := map[string]*types.Exception{}
 	for cIndex, collection := range t.Collections {
 		UnhandledErrInCollection := map[string]*types.Exception{}
@@ -158,7 +138,7 @@ func (t *List) ExecuteTasks() *types.Exception {
 		}
 
 		for tIndex, task := range collection.List {
-			if err := GlobalHandler().Execute(collection.Owner, task.Operation, task.Arguments); err != nil {
+			if err := GlobalHandler().Execute(collection.Owner, task.Operation, env, task.Arguments); err != nil {
 				UnhandledErrInCollection["T"+strconv.Itoa(tIndex)] = err
 			}
 		}

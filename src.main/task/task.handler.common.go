@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Handler_COMMON(operation string, args interface{}) (interface{}, *types.Exception) {
+func Handler_COMMON(operation string, env map[string]interface{}, args interface{}) (interface{}, *types.Exception) {
 	switch operation {
 	case "execute":
 		return Handler_COMMON_Cmd(args)

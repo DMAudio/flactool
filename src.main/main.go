@@ -36,7 +36,9 @@ func main() {
 		panic("未指定任务配置文件")
 	} else if taskList, err := task.LoadTaskList(*taskFile); err != nil {
 		types.Throw(err, types.RsError)
-	} else if err := taskList.ExecuteTasks(); err != nil {
+	} else if err := taskList.ExecuteTasks(map[string]interface{}{
+
+	}); err != nil {
 		types.Throw(err, types.RsError)
 	} else if *outputFile != "" {
 		if outputFileProcessed, _, err := task.GlobalArgFilter().FillArgs(*outputFile, nil); err != nil {
