@@ -169,7 +169,7 @@ func (fObj *Flac) FindBlocks(pattern string) ([]int, *types.Exception) {
 		return nil, types.NewException(
 			TMFlac_FailedTo_Parse_FilterPattern,
 			map[string]string{"pattern": pattern},
-			types.Mismatched_Format_Exception(
+			types.Exception_Mismatched_Format(
 				"BlockType or BlockType:TagName1=Filter1[&TagName2=Filter2...]",
 				"(Empty)",
 			),
@@ -192,7 +192,7 @@ func (fObj *Flac) FindBlocks(pattern string) ([]int, *types.Exception) {
 			return nil, types.NewException(
 				TMFlac_FailedTo_Parse_FilterPattern,
 				map[string]string{"pattern": pattern},
-				types.Mismatched_Format_Exception(
+				types.Exception_Mismatched_Format(
 					"BlockType or BlockType:TagName1=Filter1[&TagName2=Filter2...]",
 					"BlockType:(Empty)",
 				),

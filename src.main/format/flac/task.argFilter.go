@@ -8,11 +8,11 @@ import (
 func SplitFilterArg(argRaw string) (string, string, *types.Exception) {
 	argSplit := strings.SplitN(argRaw, "->", 2)
 	if len(argSplit) != 2 {
-		return "", "", types.Mismatched_Format_Exception("FilterPattern -> OperationArg", argRaw)
+		return "", "", types.Exception_Mismatched_Format("FilterPattern -> OperationArg", argRaw)
 	} else if filterPattern := strings.TrimSpace(argSplit[0]); filterPattern == "" {
-		return "", "", types.Mismatched_Format_Exception("FilterPattern", "(Empty)")
+		return "", "", types.Exception_Mismatched_Format("FilterPattern", "(Empty)")
 	} else if operationArg := strings.TrimSpace(argSplit[1]); operationArg == "" {
-		return "", "", types.Mismatched_Format_Exception("OperationArg", "(Empty)")
+		return "", "", types.Exception_Mismatched_Format("OperationArg", "(Empty)")
 	} else {
 		return filterPattern, operationArg, nil
 	}

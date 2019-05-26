@@ -61,7 +61,7 @@ func TaskHandler_T4VORB_SetRefer(args interface{}) (interface{}, *types.Exceptio
 	} else if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
 	} else if newRefer, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
+		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if newReferProcessed, _, err := task.GlobalArgFilter().FillArgs(newRefer, nil); err != nil {
 		return nil, err
 	} else {
@@ -88,7 +88,7 @@ func TaskHandler_T4VORB_PrintTags(args interface{}) (interface{}, *types.Excepti
 }
 
 func TaskHandler_T4VORB_SetTags(args interface{}) (interface{}, *types.Exception) {
-	if argList, err := types.InterfaceToStringSlice(args); err != nil {
+	if argList, err := types.InterfaceToStringSlice(args, types.TypeString_Error); err != nil {
 		return nil, err
 	} else {
 		for _, argLine := range argList {
@@ -106,7 +106,7 @@ func TaskHandler_T4VORB_SetTagLine(line string) *types.Exception {
 	if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return err
 	} else if lineSplit := strings.SplitN(line, "=", 2); len(lineSplit) != 2 {
-		return types.Mismatched_Format_Exception("(key)=(value)", line)
+		return types.Exception_Mismatched_Format("(key)=(value)", line)
 	} else {
 		body.SetComments(strings.TrimSpace(lineSplit[0]), strings.TrimSpace(lineSplit[1]), types.SSLM_Append)
 	}
@@ -117,7 +117,7 @@ func TaskHandler_T4VORB_dumpTags(args interface{}) (interface{}, *types.Exceptio
 	if args == nil {
 		return nil, nil
 	} else if tagListPath, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
+		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, nil); err != nil {
 		return nil, err
 	} else if tagListContent, err := TaskHandler_T4VORB_PrintTags(nil); err != nil {
@@ -133,7 +133,7 @@ func TaskHandler_T4VORB_importTags(args interface{}) (interface{}, *types.Except
 	if args == nil {
 		return nil, nil
 	} else if tagListPath, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
+		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, nil); err != nil {
 		return nil, err
 	} else if fileContent, err := utils.FileReadBytes(tagListPathParsed); err != nil {
@@ -155,7 +155,7 @@ func TaskHandler_T4VORB_loadTags(args interface{}) (interface{}, *types.Exceptio
 	} else if body, err := TaskHandler_T4VORB_GetBody(); err != nil {
 		return nil, err
 	} else if tagListPath, ok := args.(string); !ok {
-		return nil, types.Mismatched_Format_Exception("Type:string", "Type:"+reflect.TypeOf(args).String())
+		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
 	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, nil); err != nil {
 		return nil, err
 	} else if fileContent, err := utils.FileReadBytes(tagListPathParsed); err != nil {
@@ -166,7 +166,7 @@ func TaskHandler_T4VORB_loadTags(args interface{}) (interface{}, *types.Exceptio
 		commentMap := &types.SSListedMap{}
 		for _, tagLine := range strings.Split(string(fileContent), "\n") {
 			if lineSplit := strings.SplitN(tagLine, "=", 2); len(lineSplit) != 2 {
-				return nil, types.Mismatched_Format_Exception("(key)=(value)", tagLine)
+				return nil, types.Exception_Mismatched_Format("(key)=(value)", tagLine)
 			} else {
 				commentMap.Set(strings.TrimSpace(lineSplit[0]), strings.TrimSpace(lineSplit[1]), types.SSLM_Append)
 			}

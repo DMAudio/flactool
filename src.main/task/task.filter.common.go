@@ -36,7 +36,7 @@ func Filter_DecodeURI(input string, extraArgs map[string]interface{}) (string, *
 	if matched, err := regexp.MatchString("^([0-9A-F]{2})+$", input); err != nil {
 		return "", types.NewException(TMFilter_FailedTo_CompileRegex, nil, err)
 	} else if !matched {
-		return "", types.Mismatched_Format_Exception("Regex:$([0-9A-Z]{2})+^", input)
+		return "", types.Exception_Mismatched_Format("Regex:$([0-9A-Z]{2})+^", input)
 	}
 
 	encodeBuffer := types.NewBuffer()
