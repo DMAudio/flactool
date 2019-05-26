@@ -145,7 +145,7 @@ func main() {
 				"-input", inputFile,
 				"-task", filepath.ToSlash(*task),
 				"-output", outputFile,
-				"-trace", "48",
+				"-trace", "28",
 			}
 			cmd := exec.Command(command[0], command[1:]...)
 			fixEnv(cmd, map[string]string{
@@ -172,11 +172,14 @@ func main() {
 			taskAmount += 1
 
 			if err != nil {
-				message := fmt.Sprintf("无法执行任务: %v", err)
-				fmt.Println(message)
-				errStr += message
-			} else {
-				fmt.Println(outStr)
+				message := fmt.Sprintf("无法执行任务: %v\n\n", err)
+				errStr = errStr + "\n" + message
+			}
+
+			fmt.Println(outStr)
+			if errStr != "" {
+				fmt.Println("发生了以下错误：")
+				fmt.Println(errStr)
 			}
 
 			errStr = strings.TrimSpace(errStr)

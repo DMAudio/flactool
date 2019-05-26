@@ -8,15 +8,16 @@ import (
 	"time"
 )
 
-type Severity uint
+type Severity uint8
 
 const (
-	RsDebug   Severity = 1
-	RsInfo    Severity = 2
-	RsNotify  Severity = 4
-	RsWarning Severity = 8
-	RsError   Severity = 16
-	RsPanic   Severity = 32
+	RsDebug   Severity = 1 << (8 - 1 - iota) //128
+	RsInfo                                   //64
+	RsNotify                                 //32
+	RsWarning                                //16
+	RsError                                  //8
+	RsPanic                                  //4
+	RsUnknown                                //2
 )
 
 type Throwable interface {
@@ -43,8 +44,11 @@ func severity2Str(s Severity) string {
 		return "E"
 	case RsPanic:
 		return "P"
+	case RsUnknown:
+		fallthrough
+	default:
+		return "U"
 	}
-	return "(unknown)"
 }
 
 func Throw(t Throwable, severity Severity) {
@@ -54,9 +58,10 @@ func Throw(t Throwable, severity Severity) {
 		false,
 	)
 	if severity != RsPanic {
-		fmt.Println(message)
-		if severity > RsWarning {
+		if severity&(RsWarning|RsError|RsPanic|RsUnknown) > 0 {
 			_, _ = fmt.Fprintln(os.Stderr, message)
+		}else {
+			_, _ = fmt.Fprintln(os.Stdout, message)
 		}
 	} else {
 		log.Panicln(message)
