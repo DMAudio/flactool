@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func SplitFilterArg(argRaw string) (string, string, *types.Exception) {
+func SplitFillerArg(argRaw string) (string, string, *types.Exception) {
 	argSplit := strings.SplitN(argRaw, "->", 2)
 	if len(argSplit) != 2 {
 		return "", "", types.Exception_Mismatched_Format("FilterPattern -> OperationArg", argRaw)
@@ -21,7 +21,7 @@ func SplitFilterArg(argRaw string) (string, string, *types.Exception) {
 func ArgFiller(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
 	var err *types.Exception
 	var blockFilter, blockTagPath string
-	if blockFilter, blockTagPath, err = SplitFilterArg(input); err != nil {
+	if blockFilter, blockTagPath, err = SplitFillerArg(input); err != nil {
 		return "", err
 	}
 
@@ -63,7 +63,7 @@ func ArgFiller(input string, extraArgs map[string]interface{}) (string, *types.E
 
 }
 
-func WarpFlacToExtraArgs(flac *Flac) map[string]map[string]interface{} {
+func ToArgFillerParameter(flac *Flac) map[string]map[string]interface{} {
 	return map[string]map[string]interface{}{
 		"flac": {"flac": flac},
 	}

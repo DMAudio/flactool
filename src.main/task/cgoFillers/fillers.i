@@ -1,7 +1,7 @@
-%module cgoFilters
+%module cgoFillers
 
 %{
-#include "filters.h"
+#include "fillers.h"
 %}
 
 %insert(cgo_comment_typedefs) %{
@@ -14,4 +14,4 @@
 %template(VectorString) std::vector<std::string>;
 %template(VectorVectorString) std::vector<std::vector<std::string>>;
 
-%include "filters.h"
+%include "fillers.h"

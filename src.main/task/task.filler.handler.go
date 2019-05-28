@@ -8,12 +8,12 @@ import (
 	"strings"
 )
 
-func Filter_Env(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
+func Filler_Env(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
 	input = strings.TrimSpace(input)
 	return os.Getenv(input), nil
 }
 
-func Filter_FmtFileName(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
+func Filler_FmtFileName(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
 	input = strings.ReplaceAll(input, "\u003A", "\uFF1A")
 	input = strings.ReplaceAll(input, "\u002F", "\uFF0F")
 	input = strings.ReplaceAll(input, "\u005C", "\uFF3C")
@@ -31,17 +31,17 @@ var TMArg_FailedTo_Parse_URISequence = types.NewMask(
 	"无法解析编码的URI序列",
 )
 
-func Filter_DecodeURI(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
+func Filler_DecodeURI(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
 	input = strings.ToUpper(input)
 	if matched, err := regexp.MatchString("^([0-9A-F]{2})+$", input); err != nil {
-		return "", types.NewException(TMFilter_FailedTo_CompileRegex, nil, err)
+		return "", types.NewException(TMFiller_FailedTo_CompileRegex, nil, err)
 	} else if !matched {
 		return "", types.Exception_Mismatched_Format("Regex:$([0-9A-Z]{2})+^", input)
 	}
 
 	encodeBuffer := types.NewBuffer()
 	if regex, err := regexp.Compile("[0-9A-F]{2}"); err != nil {
-		return "", types.NewException(TMFilter_FailedTo_CompileRegex, nil, err)
+		return "", types.NewException(TMFiller_FailedTo_CompileRegex, nil, err)
 	} else {
 		for _, charCode := range regex.FindAllString(input, -1) {
 			encodeBuffer.WriteStringsIE("%", charCode)

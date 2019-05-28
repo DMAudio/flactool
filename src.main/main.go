@@ -44,7 +44,7 @@ func main() {
 	}); err != nil {
 		types.Throw(err, types.RsError)
 	} else if *outputFile != "" {
-		if outputFileProcessed, _, err := task.GlobalArgFiller().FillArgs(*outputFile, flac.WarpFlacToExtraArgs(fObj)); err != nil {
+		if outputFileProcessed, _, err := task.GlobalArgFiller().FillArgs(*outputFile, flac.ToArgFillerParameter(fObj)); err != nil {
 			types.Throw(err, types.RsError)
 		} else {
 			fObj.WriteToFile(outputFileProcessed)

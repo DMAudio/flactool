@@ -154,7 +154,7 @@ func TaskHandler_T6PICT_setDesc(flac *Flac, args interface{}) (interface{}, *typ
 func TaskHandler_T6PICT_getDesc(flac *Flac, args interface{}) (interface{}, *types.Exception) {
 	if argParsed, ok := args.(string); !ok {
 		return nil, types.Exception_Mismatched_Format("Type:string", reflect.TypeOf(args).String())
-	} else if pattern, _, err := task.GlobalArgFiller().FillArgs(argParsed, WarpFlacToExtraArgs(flac)); err != nil {
+	} else if pattern, _, err := task.GlobalArgFiller().FillArgs(argParsed, ToArgFillerParameter(flac)); err != nil {
 		return nil, err
 	} else {
 		results := make([]string, 0)
