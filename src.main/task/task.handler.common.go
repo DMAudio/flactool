@@ -28,7 +28,7 @@ func Handler_COMMON_Cmd(args interface{}) (interface{}, *types.Exception) {
 	}
 
 	for argIndex, argRaw := range argsRaw {
-		if argParsed, _, err := GlobalArgFilter().FillArgs(argRaw, nil); err != nil {
+		if argParsed, _, err := GlobalArgFiller().FillArgs(argRaw, nil); err != nil {
 			return nil, err
 		} else {
 			argsRaw[argIndex] = argParsed

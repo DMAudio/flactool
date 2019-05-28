@@ -19,7 +19,7 @@ func Init() *types.Exception {
 		return err
 	}
 
-	if err := task.GlobalArgFilter().Register("flac", ArgFilter); err != nil {
+	if err := task.GlobalArgFiller().Register("flac", ArgFiller); err != nil {
 		return err
 	}
 

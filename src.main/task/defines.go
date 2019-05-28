@@ -81,7 +81,7 @@ var TMFilter_Undefined_Handler = types.NewMask(
 
 var TMFilter_FailedToExecute_Filter = types.NewMask(
 	"Failed_To_Execute_Filter",
-	"Filter执行失败（执行者：{{handler}}，参数：{{args}}）",
+	"Filter执行失败（执行者：{{handler}}，参数：{{parameters}}）",
 )
 
 var TMFilter_FailedToFill_Args = types.NewMask(

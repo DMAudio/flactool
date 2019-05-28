@@ -7,15 +7,15 @@ func Init() *types.Exception {
 		return err
 	}
 
-	if err := GlobalArgFilter().Register("env", Filter_Env); err != nil {
+	if err := GlobalArgFiller().Register("env", Filter_Env); err != nil {
 		return err
 	}
 
-	if err := GlobalArgFilter().Register("fmtFName", Filter_FmtFileName); err != nil {
+	if err := GlobalArgFiller().Register("fmtFName", Filter_FmtFileName); err != nil {
 		return err
 	}
 
-	if err := GlobalArgFilter().Register("u", Filter_DecodeURI); err != nil {
+	if err := GlobalArgFiller().Register("u", Filter_DecodeURI); err != nil {
 		return err
 	}
 

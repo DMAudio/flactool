@@ -18,7 +18,7 @@ func TaskHandler_T4VORB_SetRefer(flac *Flac, T4Body *MetaBlockT4VORB, args inter
 		return nil, nil
 	} else if newRefer, ok := args.(string); !ok {
 		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
-	} else if newReferProcessed, _, err := task.GlobalArgFilter().FillArgs(newRefer, WarpFlacToExtraArgs(flac)); err != nil {
+	} else if newReferProcessed, _, err := task.GlobalArgFiller().FillArgs(newRefer, WarpFlacToExtraArgs(flac)); err != nil {
 		return nil, err
 	} else {
 		T4Body.SetRefer(newReferProcessed)
@@ -44,7 +44,7 @@ func TaskHandler_T4VORB_SetTags(flac *Flac, T4Body *MetaBlockT4VORB, args interf
 		return nil, err
 	} else {
 		for _, argLine := range argList {
-			if argParsed, _, err := task.GlobalArgFilter().FillArgs(argLine, WarpFlacToExtraArgs(flac)); err != nil {
+			if argParsed, _, err := task.GlobalArgFiller().FillArgs(argLine, WarpFlacToExtraArgs(flac)); err != nil {
 				return nil, err
 			} else if err := TaskHandler_T4VORB_SetTagLine(flac, T4Body, argParsed); err != nil {
 				return nil, err
@@ -68,7 +68,7 @@ func TaskHandler_T4VORB_dumpTags(flac *Flac, T4Body *MetaBlockT4VORB, args inter
 		return nil, nil
 	} else if tagListPath, ok := args.(string); !ok {
 		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
-	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, WarpFlacToExtraArgs(flac)); err != nil {
+	} else if tagListPathParsed, _, err := task.GlobalArgFiller().FillArgs(tagListPath, WarpFlacToExtraArgs(flac)); err != nil {
 		return nil, err
 	} else if tagListContent, err := TaskHandler_T4VORB_PrintTags(flac, T4Body, nil); err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func TaskHandler_T4VORB_importTags(flac *Flac, T4Body *MetaBlockT4VORB, args int
 		return nil, nil
 	} else if tagListPath, ok := args.(string); !ok {
 		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
-	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, WarpFlacToExtraArgs(flac)); err != nil {
+	} else if tagListPathParsed, _, err := task.GlobalArgFiller().FillArgs(tagListPath, WarpFlacToExtraArgs(flac)); err != nil {
 		return nil, err
 	} else if fileContent, err := utils.FileReadBytes(tagListPathParsed); err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func TaskHandler_T4VORB_loadTags(flac *Flac, T4Body *MetaBlockT4VORB, args inter
 		return nil, nil
 	} else if tagListPath, ok := args.(string); !ok {
 		return nil, types.Exception_Mismatched_Format("Type:string", "Type:"+reflect.TypeOf(args).String())
-	} else if tagListPathParsed, _, err := task.GlobalArgFilter().FillArgs(tagListPath, WarpFlacToExtraArgs(flac)); err != nil {
+	} else if tagListPathParsed, _, err := task.GlobalArgFiller().FillArgs(tagListPath, WarpFlacToExtraArgs(flac)); err != nil {
 		return nil, err
 	} else if fileContent, err := utils.FileReadBytes(tagListPathParsed); err != nil {
 		return nil, err

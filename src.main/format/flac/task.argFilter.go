@@ -18,7 +18,7 @@ func SplitFilterArg(argRaw string) (string, string, *types.Exception) {
 	}
 }
 
-func ArgFilter(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
+func ArgFiller(input string, extraArgs map[string]interface{}) (string, *types.Exception) {
 	var err *types.Exception
 	var blockFilter, blockTagPath string
 	if blockFilter, blockTagPath, err = SplitFilterArg(input); err != nil {

@@ -125,7 +125,7 @@ func (t *List) ExecuteTasks(env map[string]interface{}) *types.Exception {
 		UnhandledErrInCollection := map[string]*types.Exception{}
 
 		if collection.When != "" {
-			if whenStrParsed, _, err := GlobalArgFilter().FillArgs(collection.When, nil); err != nil {
+			if whenStrParsed, _, err := GlobalArgFiller().FillArgs(collection.When, nil); err != nil {
 				UnhandledErrInCollection["_when_"] = types.NewException(TMTask_FailedTo_Parse_WhenPattern, nil, err)
 			} else if whenStrSplit := strings.SplitN(whenStrParsed, "->", 2); len(whenStrSplit) != 2 {
 				UnhandledErrInCollection["_when_"] = types.Exception_Mismatched_Format(

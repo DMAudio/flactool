@@ -9,17 +9,17 @@ import (
 	"sync"
 )
 
-type ArgFilter struct {
-	filters map[string]func(string, map[string]interface{}) (string, *types.Exception)
+type ArgFiller struct {
+	fillers map[string]func(string, map[string]interface{}) (string, *types.Exception)
 }
 
-func NewArgFilter() *ArgFilter {
-	return &ArgFilter{
-		filters: map[string]func(string, map[string]interface{}) (string, *types.Exception){},
+func NewArgFiller() *ArgFiller {
+	return &ArgFiller{
+		fillers: map[string]func(string, map[string]interface{}) (string, *types.Exception){},
 	}
 }
 
-func (af *ArgFilter) FillArgs(raw string, extraArgsCollection map[string]map[string]interface{}) (string, int, *types.Exception) {
+func (af *ArgFiller) FillArgs(raw string, extraArgsCollection map[string]map[string]interface{}) (string, int, *types.Exception) {
 	argList := cgoFilters.GetArgs(raw)
 	if argList == nil || argList.Size() == 0 {
 		return raw, 0, nil
@@ -63,41 +63,41 @@ func (af *ArgFilter) FillArgs(raw string, extraArgsCollection map[string]map[str
 	}
 }
 
-func (af *ArgFilter) ParseArg(filterName string, args string, extraArgs map[string]interface{}) (string, *types.Exception) {
-	if filter, exist := af.filters[filterName]; !exist {
+func (af *ArgFiller) ParseArg(fillerName string, parameter string, extraArgs map[string]interface{}) (string, *types.Exception) {
+	if handler, exist := af.fillers[fillerName]; !exist {
 		return "", types.NewException(TMFilter_Undefined_Handler, map[string]string{
-			"handler": filterName,
+			"handler": fillerName,
 		}, nil)
-	} else if result, err := filter(args, extraArgs); err != nil {
+	} else if result, err := handler(parameter, extraArgs); err != nil {
 		return "", types.NewException(TMFilter_FailedToExecute_Filter, map[string]string{
-			"handler": filterName,
-			"args":    args,
+			"handler":    fillerName,
+			"parameters": parameter,
 		}, err)
 	} else {
 		return result, nil
 	}
 }
 
-func (af *ArgFilter) Register(filterName string, handler func(string, map[string]interface{}) (string, *types.Exception)) *types.Exception {
-	if _, alreadyExist := af.filters[filterName]; alreadyExist {
+func (af *ArgFiller) Register(fillerName string, filler func(string, map[string]interface{}) (string, *types.Exception)) *types.Exception {
+	if _, alreadyExist := af.fillers[fillerName]; alreadyExist {
 		return types.NewException(TMFilter_CanNotRegister, map[string]string{
 			"reason": "执行者名称冲突",
 		}, nil)
 	}
-	af.filters[filterName] = handler
+	af.fillers[fillerName] = filler
 	return nil
 }
 
-var globalArgFilter *ArgFilter
-var globalArgFilterLock sync.Mutex
+var globalArgFiller *ArgFiller
+var globalArgFillerLock sync.Mutex
 
-func GlobalArgFilter() *ArgFilter {
-	if globalArgFilter == nil {
-		globalArgFilterLock.Lock()
-		defer globalArgFilterLock.Unlock()
-		if globalArgFilter == nil {
-			globalArgFilter = NewArgFilter()
+func GlobalArgFiller() *ArgFiller {
+	if globalArgFiller == nil {
+		globalArgFillerLock.Lock()
+		defer globalArgFillerLock.Unlock()
+		if globalArgFiller == nil {
+			globalArgFiller = NewArgFiller()
 		}
 	}
-	return globalArgFilter
+	return globalArgFiller
 }
