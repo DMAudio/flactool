@@ -1,4 +1,4 @@
-# DADP.FlacTool
+# gitlab.com/KTGWKenta/DADP.FlacTool
 A tool manipulates structure of flac file(s) according to the given task list.  
 Compatible with Golang >= 1.12, Windows, macOS, and Linux.
 
@@ -23,14 +23,14 @@ Configure Task List:
   - Values from METADATA_BLOCK_DATA
 
 ## Usage
-Download binary files from [Releases](https://gitlab.com/KTGWKenta/DADP.FlacTool/releases) or
+Download binary files from [Releases](https://gitlab.com/KTGWKenta/gitlab.com/KTGWKenta/DADP.FlacTool/releases) or
 build with following command:
 ```bash
 # Clone this repository
-$ git clone git@gitlab.com:KTGWKenta/DADP.FlacTool.git
+$ git clone git@gitlab.com:KTGWKenta/gitlab.com/KTGWKenta/DADP.FlacTool.git
 
 # Go into the repository
-$ cd DADP.FlacTool
+$ cd gitlab.com/KTGWKenta/DADP.FlacTool
 
 # Build (for Windows)
 $ build.cmd
@@ -59,4 +59,4 @@ Feel free to commit issues if you come across any problem.
 ## License
 Copyright (c) 2019 Digimon Audiopedia Database Project.  
 Licensed under GNU General Public License v3.0.  
-See the [LICENSE](https://gitlab.com/KTGWKenta/DADP.FlacTool/blob/master/LICENSE.md) for more information.
+See the [LICENSE](https://gitlab.com/KTGWKenta/gitlab.com/KTGWKenta/DADP.FlacTool/blob/master/LICENSE.md) for more information.
